@@ -1,5 +1,7 @@
 import { getRankings } from "@/server/queries";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const rankings = await getRankings();
 
