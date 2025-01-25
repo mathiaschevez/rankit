@@ -12,7 +12,7 @@ export default async function Home() {
   const rankings = await getRankings();
 
   return (
-    <div className="">
+    <div className="px-4">
       <NavBar />
       {rankings.map((ranking) =>
         <div
@@ -28,8 +28,17 @@ export default async function Home() {
 
 function NavBar() {
   return (
-    <div>
-      <SignedIn><UserButton /></SignedIn>
+    <div className="flex justify-between h-16 items-center">
+      Rankit
+      <SignedIn>
+        <UserButton
+          appearance={{
+            elements: {
+              userButtonAvatarBox: "w-9 h-9"
+            }}
+          }
+        />
+      </SignedIn>
       <SignedOut><SignInButton /></SignedOut>
     </div>
   )
