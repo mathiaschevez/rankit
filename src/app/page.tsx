@@ -1,6 +1,12 @@
 import { getRankings } from "@/server/queries";
 
 export const dynamic = "force-dynamic";
+import {
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton
+} from '@clerk/nextjs'
 
 export default async function Home() {
   const rankings = await getRankings();
@@ -22,6 +28,9 @@ export default async function Home() {
 
 function NavBar() {
   return (
-    <div>Nav</div>
+    <div>
+      <SignedIn><UserButton /></SignedIn>
+      <SignedOut><SignInButton /></SignedOut>
+    </div>
   )
 }
