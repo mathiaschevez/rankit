@@ -11,20 +11,17 @@ type RankItem = {
 
 export const createTable = pgTableCreator((name) => `rankit_${name}`);
 
-export const rankingsTable = createTable(
-  'rankings',
-  {
-    id: serial('id').primaryKey(),
-    title: text('title').notNull(),
-    userId: varchar("userId", { length: 256 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt", { withTimezone: true }),
+export const rankings = createTable('rankings', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  userId: varchar("userId", { length: 256 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }),
 
-    rankItems: jsonb().$type<RankItem>().array()
-  }
-);
+  rankItems: jsonb().$type<RankItem>().array()
+});
 
-export type InsertRanking = typeof rankingsTable.$inferInsert;
-export type SelectRanking = typeof rankingsTable.$inferSelect;
+export type InsertRanking = typeof rankings.$inferInsert;
+export type SelectRanking = typeof rankings.$inferSelect;

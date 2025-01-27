@@ -8,6 +8,7 @@ import {
   SignedOut,
   UserButton
 } from '@clerk/nextjs'
+import Link from "next/link";
 
 export default async function Home() {
   const rankings = await getRankings();
@@ -16,12 +17,13 @@ export default async function Home() {
     <div className="px-4">
       <NavBar />
       {rankings.map((ranking) =>
-        <div
+        <Link
           key={ranking.id}
+          href={`/ranking/${ranking.id}`}
           className='border border-white'
         >
           {ranking.title}
-        </div>)
+        </Link>)
       }
     </div>
   );
