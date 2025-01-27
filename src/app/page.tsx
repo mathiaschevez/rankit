@@ -1,50 +1,34 @@
+import Navbar from "@/components/Navbar";
+import { Card } from "@/components/ui/card";
 import { getRankings } from "@/server/queries";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
-
-import {
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton
-} from '@clerk/nextjs'
-import Link from "next/link";
 
 export default async function Home() {
   const rankings = await getRankings();
 
   return (
     <div className="px-4">
-      <NavBar />
-      {rankings.map((ranking) =>
-        <Link
-          key={ranking.id}
-          href={`/ranking/${ranking.id}`}
-          className='border border-white'
-        >
-          {ranking.title}
-        </Link>)
-      }
+      <Navbar />
+      <Header text='Rankings' />
+      <div className="flex w-full">
+        {rankings.map((ranking) =>
+          <Link
+            key={ranking.id}
+            href={`/ranking/${ranking.id}`}
+          >
+            <Card className="border-2 w-72 h-72 p-4">
+              {ranking.title}
+            </Card>
+          </Link>)}
+      </div>
     </div>
   );
 }
 
-function NavBar() {
+function Header({ text }: { text: string }) {
   return (
-    <div className="flex justify-between h-16 items-center">
-      Rankit
-      <SignedIn>
-        <UserButton
-          appearance={{
-            elements: {
-              userButtonAvatarBox: "w-9 h-9"
-            }}
-          }
-        />
-      </SignedIn>
-      <SignedOut>
-        <SignInButton><div className="bg-blue-600 py-2 px-4 rounded text-white cursor-pointer">Sign In</div></SignInButton>
-      </SignedOut>
-    </div>
+    <div className="text-3xl font-semibold mb-4">{text}</div>
   )
 }
