@@ -1,6 +1,7 @@
 import { getRankings } from "@/server/queries";
 
 export const dynamic = "force-dynamic";
+
 import {
   SignInButton,
   SignedIn,
@@ -19,7 +20,7 @@ export default async function Home() {
           key={ranking.id}
           className='border border-white'
         >
-          {ranking.name}
+          {ranking.title}
         </div>)
       }
     </div>
@@ -39,7 +40,9 @@ function NavBar() {
           }
         />
       </SignedIn>
-      <SignedOut><SignInButton /></SignedOut>
+      <SignedOut>
+        <SignInButton><div className="bg-blue-600 py-2 px-4 rounded text-white cursor-pointer">Sign In</div></SignInButton>
+      </SignedOut>
     </div>
   )
 }

@@ -1,4 +1,13 @@
-import { pgTableCreator, serial, text } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { jsonb, pgTableCreator, serial, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+
+type RankItem = {
+  name: string,
+  image: string,
+  upvotes: number,
+  downvotes: number,
+  rank: number,
+}
 
 export const createTable = pgTableCreator((name) => `rankit_${name}`);
 
@@ -6,7 +15,14 @@ export const rankingsTable = createTable(
   'rankings',
   {
     id: serial('id').primaryKey(),
-    name: text('title').notNull(),
+    title: text('title').notNull(),
+    userId: varchar("userId", { length: 256 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updatedAt", { withTimezone: true }),
+
+    rankItems: jsonb().$type<RankItem>().array()
   }
 );
 
