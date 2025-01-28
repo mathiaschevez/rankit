@@ -15,7 +15,8 @@ export const rankings = createTable('rankings', {
   id: serial('id').primaryKey(),
   title: text('title').notNull(),
   userId: varchar("userId", { length: 256 }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
+  coverImageUrl: varchar("coverImageUrl", { length: 1024 }),
+  createdAt: timestamp("createdAt", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   updatedAt: timestamp("updatedAt", { withTimezone: true }),
