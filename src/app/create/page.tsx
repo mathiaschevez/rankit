@@ -1,5 +1,6 @@
 'use client'
 
+import { BouncingLoader } from "@/components/Loaders";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createRanking } from "@/server/queries";
@@ -24,21 +25,6 @@ const useUploadThingInputProps = (...args: Input) => {
     isUploading: $ut.isUploading,
   };
 };
-
-
-function LoadingSpinnerSVG() {
-  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-    <circle fill="#fff" stroke="#fff" strokeWidth="15" r="15" cx="40" cy="65">
-      <animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate>
-    </circle>
-    <circle fill="#fff" stroke="#fff" strokeWidth="15" r="15" cx="100" cy="65">
-      <animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate>
-    </circle>
-    <circle fill="#fff" stroke="#fff" strokeWidth="15" r="15" cx="160" cy="65">
-      <animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate>
-    </circle>
-  </svg>
-}
 
 export default function CreateRanking() {
   const user = useUser();
@@ -67,7 +53,7 @@ export default function CreateRanking() {
     onUploadBegin() {
       toast(
         <div className="flex gap-4 items-center dark:text-white w-full">
-          <div className="w-[33px]"><LoadingSpinnerSVG /></div>
+          <div className="w-[33px]"><BouncingLoader /></div>
           <span className=" w-full">Uploading...</span>
         </div>,
         {
