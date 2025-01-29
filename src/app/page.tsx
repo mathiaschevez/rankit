@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { getRankings } from "@/server/queries";
+import Image from "next/image";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +20,7 @@ export default async function Home() {
             href={`/ranking/${ranking.id}`}
           >
             <Card className="border-2 w-72 h-72 p-4">
+              {ranking.coverImageUrl && <Image alt='coverImg' src={ranking.coverImageUrl} width={300} height={300} /> }
               {ranking.title}
             </Card>
           </Link>)}
