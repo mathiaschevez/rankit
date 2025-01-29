@@ -27,15 +27,16 @@ const useUploadThingInputProps = (...args: Input) => {
 
 
 function LoadingSpinnerSVG() {
-  return <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-    fill="white"
-  >
-    <path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25" />
-    <path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" className="spinner_ajPY"/>
+  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+    <circle fill="#fff" stroke="#fff" strokeWidth="15" r="15" cx="40" cy="65">
+      <animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate>
+    </circle>
+    <circle fill="#fff" stroke="#fff" strokeWidth="15" r="15" cx="100" cy="65">
+      <animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate>
+    </circle>
+    <circle fill="#fff" stroke="#fff" strokeWidth="15" r="15" cx="160" cy="65">
+      <animate attributeName="cy" calcMode="spline" dur="2" values="65;135;65;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate>
+    </circle>
   </svg>
 }
 
@@ -65,9 +66,9 @@ export default function CreateRanking() {
   const { inputProps, startUpload } = useUploadThingInputProps("imageUploader", {
     onUploadBegin() {
       toast(
-        <div className="flex gap-2 items-center dark:text-white">
-          <LoadingSpinnerSVG />
-          <span>Uploading...</span>
+        <div className="flex gap-4 items-center dark:text-white w-full">
+          <div className="w-[33px]"><LoadingSpinnerSVG /></div>
+          <span className=" w-full">Uploading...</span>
         </div>,
         {
           duration: 100000,

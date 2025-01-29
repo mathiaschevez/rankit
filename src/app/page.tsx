@@ -13,7 +13,7 @@ export default async function Home() {
     <div className="px-4">
       <Navbar />
       <Header text='Rankings' />
-      <div className="flex w-full">
+      <div className="flex w-full gap-4">
         {rankings.map((ranking) =>
           <Link
             key={ranking.id}
