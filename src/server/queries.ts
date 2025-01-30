@@ -5,7 +5,7 @@ import { db } from './db';
 import { InsertRanking, rankings, SelectRanking } from './db/schema';
 
 export async function createRanking(data: InsertRanking) {
-  await db.insert(rankings).values(data);
+  return await db.insert(rankings).values(data);
 }
 
 export async function getRankings(): Promise<SelectRanking[]> {

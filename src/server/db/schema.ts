@@ -1,12 +1,11 @@
 import { sql } from 'drizzle-orm';
 import { jsonb, pgTableCreator, serial, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
-type RankItem = {
+export type RankItem = {
   name: string,
   image: string,
   upvotes: number,
   downvotes: number,
-  rank: number,
 }
 
 export const createTable = pgTableCreator((name) => `rankit_${name}`);

@@ -28,11 +28,12 @@ const useUploadThingInputProps = (...args: Input) => {
 
 export default function CreateRanking() {
   const user = useUser();
-  const [title, setTitle] = useState('');
-  const [uploadedImage, setUploadedImage] = useState<null | File>(null);
   const router = useRouter();
 
-  useEffect(() => {
+  const [title, setTitle] = useState('');
+  const [uploadedImage, setUploadedImage] = useState<null | File>(null);
+
+  useEffect(function WarnOnReload() {
     const handleBeforeUnload = (event: Event) => {
       event.preventDefault();
       return 'Are you sure you want to reload?';
@@ -74,6 +75,7 @@ export default function CreateRanking() {
           className: "dark:bg-gray-800"
         }
       );
+
       router.refresh();
     }
   });

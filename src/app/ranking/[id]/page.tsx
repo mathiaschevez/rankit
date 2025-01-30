@@ -1,4 +1,6 @@
+import { Button } from '@/components/ui/button';
 import { fetchRankingById } from '@/server/queries';
+import Link from 'next/link';
 import React from 'react'
 
 export default async function RankingDetail({ params }: { params: Promise<{id: string}> }) {
@@ -8,6 +10,9 @@ export default async function RankingDetail({ params }: { params: Promise<{id: s
   return (
     <div>
       {ranking.title}
+      <Link href={`/ranking/${rankingId}/add-rank-item`}>
+        <Button>Add Rank Items</Button>
+      </Link>
     </div>
   )
 }
