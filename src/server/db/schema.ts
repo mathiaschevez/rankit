@@ -3,6 +3,7 @@ import { jsonb, pgTableCreator, serial, text, timestamp, varchar } from 'drizzle
 
 export type RankItem = {
   name: string,
+  fileName: string,
   image: string,
   upvotes: number,
   downvotes: number,

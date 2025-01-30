@@ -10,7 +10,7 @@ export default async function AddRankItem({ params }: { params: Promise<{id: str
 
   return (
     <div>
-      <RankItemForm currentRankItems={currentRankItems} />
+      <RankItemForm currentRankItems={currentRankItems} rankingId={rankingId} />
     </div>
   )
 }
