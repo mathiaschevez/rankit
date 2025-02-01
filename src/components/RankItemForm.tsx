@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { Button } from './ui/button';
 import { createRankItems } from '@/server/queries';
 import { useUploadThing } from '@/utils/uploadthings';
+import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
 
 type Input = Parameters<typeof useUploadThing>;
 
@@ -29,7 +30,6 @@ export default function RankItemForm({ currentRankItems, rankingId }: { currentR
   const [imagesToUpload, setImagesToUpload] = useState<File[]>([]);
   const [newRankItems, setNewRankItems] = useState<RankItem[]>([]);
 
-  console.log(currentRankItems)
   const { startUpload } = useUploadThingInputProps('imageUploader', {});
 
   const onImageImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,20 +66,25 @@ export default function RankItemForm({ currentRankItems, rankingId }: { currentR
   }
 
   return (
-    <div>
-      {[...currentRankItems ?? [], ...newRankItems].map(rankItem => <div key={rankItem.name} className='flex'>
-        <Image alt="rankItemImage" src={rankItem.image} width={50} height={50} />
-        <div>{rankItem.name}</div>
-        <div>{rankItem.upvotes}</div>
-        <div>{rankItem.downvotes}</div>
-      </div>)}
+    <div className='px-4'>
+      <div className='text-2xl font-bold'>Adding Rank Items</div>
+      {[...currentRankItems ?? [], ...newRankItems].map((rankItem, i) => (
+        <div key={rankItem.name} className='flex w-full h-20 items-center gap-4'>
+          <div>{i + 1}</div>
+          <Image alt="rankItemImage" src={rankItem.image} width={50} height={50} />
+          <div className='text-xl'>{rankItem.name}</div>
+          <div className='flex gap-2 ml-auto'>
+            <div className='font-bold text-green-500 text-xl flex items-center gap-2'><FaArrowUp /> {rankItem.upvotes}</div>
+            <div className='font-bold text-xl text-orange-500 flex items-center gap-2'><FaArrowDown /> {rankItem.downvotes}</div>
+          </div>
+        </div>
+      ))}
       <div className='flex'>
         <input
           id="upload-button"
           className=""
           type="file"
           onChange={onImageImport}
-          // { ...inputProps }
         />
         {image !== null && <Image
           id="target"
@@ -88,12 +93,19 @@ export default function RankItemForm({ currentRankItems, rankingId }: { currentR
           width={50}
           height={50}
         />}
-        <Input placeholder='name' onChange={(e) => setName(e.target.value)}/>
-        <div className={`${(!image || !name) ? 'cursor-not-allowed' : ''}`}>
-          <Button
-            disabled={!image || !name}
-            onClick={handleAddRankItem}
-          >Add Rank Item</Button>
+      <div className='flex gap-2 w-full'>
+        <Input
+          className='flex-1'
+          placeholder='name'
+          onChange={(e) => setName(e.target.value)}
+          maxLength={100}
+        />
+          <div className={`${(!image || !name) ? 'cursor-not-allowed' : ''}`}>
+            <Button
+              disabled={!image || !name}
+              onClick={handleAddRankItem}
+            >Add Rank Item</Button>
+          </div>
         </div>
       </div>
       {newRankItems.length !== 0 && <Button
