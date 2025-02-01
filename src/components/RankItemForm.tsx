@@ -1,13 +1,15 @@
 'use client';
 
-import { RankItem } from '@/server/db/schema'
+import { SelectRankItem } from '@/server/db/schema'
 import React, { useState } from 'react'
 import { Input } from './ui/input';
 import Image from 'next/image';
 import { Button } from './ui/button';
-import { createRankItems } from '@/server/queries';
+import { InsertRankItems } from '@/server/queries';
 import { useUploadThing } from '@/utils/uploadthings';
-import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
+// import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
+
+type NewRankItem = { name: string, rankingId: string, fileName: string, imageUrl: string };
 
 type Input = Parameters<typeof useUploadThing>;
 
@@ -24,11 +26,11 @@ const useUploadThingInputProps = (...args: Input) => {
   };
 };
 
-export default function RankItemForm({ currentRankItems, rankingId }: { currentRankItems: RankItem[] | null, rankingId: string }) {
+export default function RankItemForm({ currentRankItems, rankingId }: { currentRankItems: SelectRankItem[], rankingId: string }) {
   const [name, setName] = useState('');
   const [image, setImage] = useState<null | File>(null);
   const [imagesToUpload, setImagesToUpload] = useState<File[]>([]);
-  const [newRankItems, setNewRankItems] = useState<RankItem[]>([]);
+  const [newRankItems, setNewRankItems] = useState<NewRankItem[]>([]);
 
   const { startUpload } = useUploadThingInputProps('imageUploader', {});
 
@@ -43,25 +45,21 @@ export default function RankItemForm({ currentRankItems, rankingId }: { currentR
     setImagesToUpload([...imagesToUpload, image]);
     setNewRankItems([...newRankItems, {
       name,
+      rankingId: rankingId,
       fileName: image.name,
-      image: URL.createObjectURL(image),
-      upvotes: 0,
-      downvotes: 0
+      imageUrl: URL.createObjectURL(image),
     }]);
+
     setName('');
     setImage(null);
   }
 
   function handleConfirmRankItems() {
     startUpload(imagesToUpload).then((res) => {
-
-      createRankItems(rankingId, [
-        ...currentRankItems ?? [],
-        ...newRankItems.map(rankItem => ({
-          ...rankItem,
-          image: res?.find(file => file.name === rankItem.fileName)?.url ?? ''
-        }))
-      ]);
+      InsertRankItems(newRankItems.map(rankItem => ({
+        ...rankItem,
+        imageUrl: res?.find(file => file.name === rankItem.fileName)?.url ?? ''
+      })));
     });
   }
 
@@ -71,11 +69,11 @@ export default function RankItemForm({ currentRankItems, rankingId }: { currentR
       {[...currentRankItems ?? [], ...newRankItems].map((rankItem, i) => (
         <div key={rankItem.name} className='flex w-full h-20 items-center gap-4'>
           <div>{i + 1}</div>
-          <Image alt="rankItemImage" src={rankItem.image} width={50} height={50} />
+          <Image alt="rankItemImage" src={rankItem.imageUrl} width={50} height={50} />
           <div className='text-xl'>{rankItem.name}</div>
           <div className='flex gap-2 ml-auto'>
-            <div className='font-bold text-green-500 text-xl flex items-center gap-2'><FaArrowUp /> {rankItem.upvotes}</div>
-            <div className='font-bold text-xl text-orange-500 flex items-center gap-2'><FaArrowDown /> {rankItem.downvotes}</div>
+            {/* <div className='font-bold text-green-500 text-xl flex items-center gap-2'><FaArrowUp /> {rankItem.upvotes}</div>
+            <div className='font-bold text-xl text-orange-500 flex items-center gap-2'><FaArrowDown /> {rankItem.downvotes}</div> */}
           </div>
         </div>
       ))}
