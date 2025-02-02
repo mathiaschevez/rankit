@@ -5,7 +5,7 @@ export function InfinityLoader() {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 150">
       <path
         fill="none"
-        stroke="#000"
+        stroke="#555"
         strokeWidth="15"
         strokeLinecap="round"
         strokeDasharray="300 385"

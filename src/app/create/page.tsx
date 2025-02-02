@@ -13,6 +13,14 @@ import { toast } from "sonner";
 
 type Input = Parameters<typeof useUploadThing>;
 
+function UploadSVG() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+    </svg>
+  );
+}
+
 const useUploadThingInputProps = (...args: Input) => {
   const $ut = useUploadThing(...args);
 
@@ -94,28 +102,41 @@ export default function CreateRanking() {
 
   return (
     <div className="p-4">
-      Create
-      <Input
-        className=''
-        placeholder="Title"
-        onChange={(e) => setTitle(e.target.value)}
-        value={title}
-      />
-      <input
-        id="upload-button"
-        className=""
-        type="file"
-        onChange={onImageImport}
-        { ...inputProps }
-      />
-      {uploadedImage !== null && <Image
-        id="target"
-        alt='uploadedImage'
-        src={URL.createObjectURL(uploadedImage)}
-        width={50}
-        height={50}
-      />}
-      <Button onClick={onBeginUpload}>Upload</Button>
+      <div className="font-bold text-3xl mb-4">Create</div>
+      <div className="flex gap-4">
+        <label
+          className="flex cursor-pointer relative min-h-80 min-w-80 max-h-80 max-w-80 border border-white overflow-hidden"
+          htmlFor="upload-button"
+        >
+          {uploadedImage !== null && <Image
+            id="target"
+            alt='uploadedImage'
+            src={URL.createObjectURL(uploadedImage)}
+            width={600}
+            height={300}
+          />}
+          <div className="absolute top-[45%] left-[45%]">
+            <UploadSVG />
+          </div>
+        </label>
+        <input
+          id="upload-button"
+          type="file"
+          className="sr-only"
+          onChange={onImageImport}
+          { ...inputProps }
+        />
+        <Input
+          className=''
+          placeholder="Title"
+          onChange={(e) => setTitle(e.target.value)}
+          value={title}
+        />
+      </div>
+      <Button
+        onClick={onBeginUpload}
+        className="py-6 px-8 text-lg mt-4"
+      >Create</Button>
     </div>
   )
 };
