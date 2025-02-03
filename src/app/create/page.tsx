@@ -73,8 +73,6 @@ export default function CreateRanking() {
       )
     },
     onClientUploadComplete() {
-      if (!user.user) return;
-
       toast.dismiss('upload-begin');
       toast(
         <span className="dark:text-white">Upload Complete</span>,
