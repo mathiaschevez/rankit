@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { Input } from './ui/input';
 import Image from 'next/image';
 import { Button } from './ui/button';
-import { InsertRankItems } from '@/server/queries';
+import { insertRankItems } from '@/server/queries';
 import { useUploadThing } from '@/utils/uploadthings';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -107,7 +107,7 @@ export default function RankItemForm({ currentRankItems, rankingId, votes }: { c
 
   function handleConfirmRankItems() {
     startUpload(imagesToUpload).then((res) => {
-      InsertRankItems(newRankItems.map(rankItem => ({
+      insertRankItems(newRankItems.map(rankItem => ({
         ...rankItem,
         imageUrl: res?.find(file => file.name === rankItem.fileName)?.url ?? ''
       })));
