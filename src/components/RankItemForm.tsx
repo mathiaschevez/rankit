@@ -1,6 +1,6 @@
 'use client';
 
-import { SelectRankItem } from '@/server/db/schema'
+import { SelectRankItem, SelectVote } from '@/server/db/schema'
 import React, { useEffect, useState } from 'react'
 import { Input } from './ui/input';
 import Image from 'next/image';
@@ -10,7 +10,7 @@ import { useUploadThing } from '@/utils/uploadthings';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { BouncingLoader } from './Loaders';
-// import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
+import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
 
 function UploadSVG() {
   return (
@@ -37,7 +37,7 @@ const useUploadThingInputProps = (...args: Input) => {
   };
 };
 
-export default function RankItemForm({ currentRankItems, rankingId }: { currentRankItems: SelectRankItem[], rankingId: string }) {
+export default function RankItemForm({ currentRankItems, rankingId, votes }: { currentRankItems: SelectRankItem[], rankingId: string, votes: SelectVote[] }) {
   const router = useRouter()
   const [name, setName] = useState('');
   const [image, setImage] = useState<undefined | File>(undefined);
@@ -118,7 +118,7 @@ export default function RankItemForm({ currentRankItems, rankingId }: { currentR
     <div className='p-4'>
       <div className='text-2xl font-bold mb-4'>Adding Rank Items</div>
       <div className='flex flex-col gap-4'>
-        {[...currentRankItems ?? [], ...newRankItems].map((rankItem, i) => (
+        {currentRankItems.map((rankItem, i) => (
           <div key={rankItem.name} className='flex w-full h-28 items-center gap-4'>
             <div>{i + 1}</div>
             <div className='flex min-h-28 max-h-28 min-w-28 max-w-28 overflow-hidden'>
@@ -126,9 +126,24 @@ export default function RankItemForm({ currentRankItems, rankingId }: { currentR
             </div>
             <div className='text-xl'>{rankItem.name}</div>
             <div className='flex gap-2 ml-auto'>
-              {/* <div className='font-bold text-green-500 text-xl flex items-center gap-2'><FaArrowUp /> {rankItem.upvotes}</div>
-              <div className='font-bold text-xl text-orange-500 flex items-center gap-2'><FaArrowDown /> {rankItem.downvotes}</div> */}
+              <div className='font-bold text-green-500 text-xl flex items-center gap-2'>
+                <FaArrowUp /> {votes.filter(v => v.rankItemId === `${rankItem.id}` && v.type === 'upvote').length}
+              </div>
+              <div className='font-bold text-xl text-orange-500 flex items-center gap-2'>
+                <FaArrowDown /> {votes.filter(v => v.rankItemId === `${rankItem.id}` && v.type === 'downvote').length}
+              </div>
             </div>
+          </div>
+        ))}
+      </div>
+      <div className='flex flex-col gap-4 mt-4'>
+        {newRankItems.map((rankItem, i) => (
+          <div key={rankItem.name} className='flex w-full h-28 items-center gap-4'>
+            <div>{currentRankItems.length + i + 1}</div>
+            <div className='flex min-h-28 max-h-28 min-w-28 max-w-28 overflow-hidden'>
+              <Image alt="rankItemImage" src={rankItem.imageUrl} width={600} height={300} />
+            </div>
+            <div className='text-xl'>{rankItem.name}</div>
           </div>
         ))}
       </div>

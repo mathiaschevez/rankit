@@ -32,6 +32,7 @@ export const votes = createTable('votes', {
   userId: varchar("userId", { length: 256 }).notNull(),
   rankingId: varchar('rankingId', { length: 256 }).notNull(),
   rankItemId: varchar('rankItemId', { length: 256 }).notNull(),
+  type: varchar('type', { length: 256 }).notNull(),
   createdAt: timestamp("createdAt", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),

@@ -2,7 +2,7 @@
 
 import { eq } from 'drizzle-orm';
 import { db } from './db';
-import { InsertRanking, InsertRankItem, rankings, rankItems, SelectRanking } from './db/schema';
+import { InsertRanking, InsertRankItem, rankings, rankItems, SelectRanking, votes } from './db/schema';
 import { auth } from '@clerk/nextjs/server';
 
 export async function createRanking(data: InsertRanking) {
@@ -29,4 +29,8 @@ export async function InsertRankItems(newRankItems: Omit<InsertRankItem, "userId
     userId,
     ...item
   })));
+}
+
+export async function getVotes(rankingId: string) {
+  return await db.select().from(votes).where(eq(votes.rankingId, rankingId));
 }

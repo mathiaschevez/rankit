@@ -1,17 +1,20 @@
 import { Button } from '@/components/ui/button';
-import { fetchRankingById, getRankItems } from '@/server/queries';
+import { fetchRankingById, getRankItems, getVotes } from '@/server/queries';
 import { auth } from '@clerk/nextjs/server';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react'
-// import { FaArrowUp } from "react-icons/fa";
-// import { FaArrowDown } from "react-icons/fa";
+import { FaArrowUp } from "react-icons/fa";
+import { FaArrowDown } from "react-icons/fa";
 
 export default async function RankingDetail({ params }: { params: Promise<{id: string}> }) {
   const { userId } = await auth();
   const rankingId = (await params).id;
   const ranking = (await fetchRankingById(Number(rankingId)))[0];
   const rankItems = await getRankItems(rankingId);
+  const votes = await getVotes(rankingId);
+
+  console.log(votes)
 
   return (
     <div className='flex px-4 h-screen py-4 gap-4'>
@@ -27,8 +30,12 @@ export default async function RankingDetail({ params }: { params: Promise<{id: s
               <Image alt="rankItemImage" src={rankItem.imageUrl} width={50} height={50} />
               <div className='text-xl flex-1'>{rankItem.name}</div>
               <div className='flex gap-2 ml-auto'>
-                {/* <div className='font-bold text-green-500 text-xl flex items-center gap-2'><FaArrowUp /> {rankItem.upvotes}</div>
-                <div className='font-bold text-xl text-orange-500 flex items-center gap-2'><FaArrowDown /> {rankItem.downvotes}</div> */}
+                <div className='font-bold text-green-500 text-xl flex items-center gap-2'>
+                  <FaArrowUp /> {votes.filter(v => v.rankItemId === `${rankItem.id}` && v.type === 'upvote').length}
+                </div>
+                <div className='font-bold text-xl text-orange-500 flex items-center gap-2'>
+                  <FaArrowDown /> {votes.filter(v => v.rankItemId === `${rankItem.id}` && v.type === 'downvote').length}
+                </div>
               </div>
             </div>
           ))}
