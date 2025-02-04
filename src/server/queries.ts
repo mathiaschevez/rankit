@@ -8,7 +8,9 @@ import { auth } from '@clerk/nextjs/server';
 // RANKINGS
 
 export async function createRanking(data: InsertRanking) {
-  return await db.insert(rankings).values(data);
+  return await db.insert(rankings)
+    .values(data)
+    .returning({ insertedId: rankings.id });
 }
 
 export async function deleteRanking(idToDelete: number) {

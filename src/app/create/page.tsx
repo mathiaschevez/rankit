@@ -88,13 +88,17 @@ export default function CreateRanking() {
 
   async function onBeginUpload() {
     if (uploadedImage !== null && user.user) {
-      startUpload([uploadedImage]).then((res) => {
-        createRanking({
-          userId: user.user.id,
-          title: title,
-          coverImageUrl: res?.[0].url
-        });
-      })
+      startUpload([uploadedImage])
+        .then((res) => {
+          createRanking({
+            userId: user.user.id,
+            title: title,
+            coverImageUrl: res?.[0].url
+          }).then((res) => {
+            const insertedId = res[0].insertedId;
+            router.replace(`/ranking/${insertedId}`);
+          });
+        })
     }
   }
 

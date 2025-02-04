@@ -189,7 +189,9 @@ export default function RankItemForm({ currentRankItems, rankingId, votes }: { c
       {newRankItems.length !== 0 && <Button
         onClick={handleConfirmRankItems}
       >Confirm Rank Items</Button>}
-      <Button onClick={() => deleteRanking(Number(rankingId))}>Delete</Button>
+      <Button onClick={() => {
+        deleteRanking(Number(rankingId)).then(() => router.replace('/'));
+      }}>Delete</Button>
     </div>
   )
 }

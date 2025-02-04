@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react'
 
-export default async function RankingDetail({ params }: { params: Promise<{id: string}> }) {
+export default async function RankingDetail({ params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth();
   const rankingId = (await params).id;
   const ranking = (await fetchRankingById(Number(rankingId)))[0];
@@ -30,8 +30,8 @@ export default async function RankingDetail({ params }: { params: Promise<{id: s
           />
           )}
         </div>
-        {userId === ranking.userId && <Link href={`/ranking/${rankingId}/add-rank-item`}>
-          <Button>Add Rank Items</Button>
+        {userId === ranking.userId && <Link href={`/ranking/${rankingId}/edit-ranking`}>
+          <Button>Edit Ranking</Button>
         </Link>}
       </div>
     </div>
