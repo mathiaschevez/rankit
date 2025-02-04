@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { Input } from './ui/input';
 import Image from 'next/image';
 import { Button } from './ui/button';
-import { insertRankItems } from '@/server/queries';
+import { deleteRanking, insertRankItems } from '@/server/queries';
 import { useUploadThing } from '@/utils/uploadthings';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -20,7 +20,7 @@ function UploadSVG() {
   );
 }
 
-type NewRankItem = { name: string, rankingId: string, fileName: string, imageUrl: string };
+type NewRankItem = { name: string, rankingId: number, fileName: string, imageUrl: string };
 
 type Input = Parameters<typeof useUploadThing>;
 
@@ -96,7 +96,7 @@ export default function RankItemForm({ currentRankItems, rankingId, votes }: { c
     setImagesToUpload([...imagesToUpload, image]);
     setNewRankItems([...newRankItems, {
       name,
-      rankingId: rankingId,
+      rankingId: Number(rankingId),
       fileName: image.name,
       imageUrl: URL.createObjectURL(image),
     }]);
@@ -127,10 +127,10 @@ export default function RankItemForm({ currentRankItems, rankingId, votes }: { c
             <div className='text-xl'>{rankItem.name}</div>
             <div className='flex gap-2 ml-auto'>
               <div className='font-bold text-green-500 text-xl flex items-center gap-2'>
-                <FaArrowUp /> {votes.filter(v => v.rankItemId === `${rankItem.id}` && v.type === 'upvote').length}
+                <FaArrowUp /> {votes.filter(v => v.rankItemId === rankItem.id && v.type === 'upvote').length}
               </div>
               <div className='font-bold text-xl text-orange-500 flex items-center gap-2'>
-                <FaArrowDown /> {votes.filter(v => v.rankItemId === `${rankItem.id}` && v.type === 'downvote').length}
+                <FaArrowDown /> {votes.filter(v => v.rankItemId === rankItem.id && v.type === 'downvote').length}
               </div>
             </div>
           </div>
@@ -189,6 +189,7 @@ export default function RankItemForm({ currentRankItems, rankingId, votes }: { c
       {newRankItems.length !== 0 && <Button
         onClick={handleConfirmRankItems}
       >Confirm Rank Items</Button>}
+      <Button onClick={() => deleteRanking(Number(rankingId))}>Delete</Button>
     </div>
   )
 }

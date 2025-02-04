@@ -10,8 +10,8 @@ export default async function RankingDetail({ params }: { params: Promise<{id: s
   const { userId } = await auth();
   const rankingId = (await params).id;
   const ranking = (await fetchRankingById(Number(rankingId)))[0];
-  const rankItems = await getRankItems(rankingId);
-  const votes = await getVotes(rankingId);
+  const rankItems = await getRankItems(Number(rankingId));
+  const votes = await getVotes(Number(rankingId));
 
   return (
     <div className='flex px-4 h-screen py-4 gap-4'>
@@ -25,7 +25,7 @@ export default async function RankingDetail({ params }: { params: Promise<{id: s
             key={rankItem.id}
             rankItem={rankItem}
             index={i + 1}
-            votes={votes.filter(v => v.rankItemId === `${rankItem.id}`)}
+            votes={votes.filter(v => v.rankItemId === rankItem.id)}
             userId={userId}
           />
           )}

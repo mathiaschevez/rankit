@@ -15,7 +15,7 @@ export default function RankItem({ rankItem, index, votes, userId }: { rankItem:
     if (!userId) return;
     insertVote({
       userId,
-      rankItemId: `${rankItem.id}`,
+      rankItemId: rankItem.id,
       rankingId: rankItem.rankingId,
       type
     }).then(() => router.refresh());

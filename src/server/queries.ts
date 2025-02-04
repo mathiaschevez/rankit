@@ -11,6 +11,10 @@ export async function createRanking(data: InsertRanking) {
   return await db.insert(rankings).values(data);
 }
 
+export async function deleteRanking(idToDelete: number) {
+  return await db.delete(rankings).where(eq(rankings.id, idToDelete));
+}
+
 export async function getRankings(): Promise<SelectRanking[]> {
   return db.selectDistinct().from(rankings);
 }
@@ -21,7 +25,7 @@ export async function fetchRankingById(rankingId: number) {
 
 // RANK ITEMS
 
-export async function getRankItems(rankingId: string) {
+export async function getRankItems(rankingId: number) {
   return await db.select().from(rankItems).where(eq(rankItems.rankingId, rankingId));
 }
 
@@ -37,11 +41,11 @@ export async function insertRankItems(newRankItems: Omit<InsertRankItem, "userId
 
 // VOTES
 
-export async function getVotes(rankingId: string) {
+export async function getVotes(rankingId: number) {
   return await db.select().from(votes).where(eq(votes.rankingId, rankingId));
 }
 
-export async function insertVote({ userId, rankingId, rankItemId, type }: { userId: string, rankingId: string, rankItemId: string, type: 'upvote' | 'downvote' }) {
+export async function insertVote({ userId, rankingId, rankItemId, type }: { userId: string, rankingId: number, rankItemId: number, type: 'upvote' | 'downvote' }) {
   const exists = (await db.select().from(votes).where(and(eq(votes.rankItemId, rankItemId), eq(votes.userId, userId)))).length > 0
 
   if (exists) {
