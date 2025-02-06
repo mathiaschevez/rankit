@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { Input } from './ui/input';
 import Image from 'next/image';
 import { Button } from './ui/button';
-import { deleteRanking, insertRankItems } from '@/server/queries';
+import { deleteRanking, deleteRankItem, insertRankItems } from '@/server/queries';
 import { useUploadThing } from '@/utils/uploadthings';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -115,8 +115,6 @@ export default function RankItemForm({ currentRankItems, rankingId, votes }: { c
 
     setName('');
     setImage(undefined);
-
-    router.refresh();
   }
 
   function handleConfirmRankItems() {
@@ -125,8 +123,15 @@ export default function RankItemForm({ currentRankItems, rankingId, votes }: { c
         ...rankItem,
         imageUrl: res?.find(file => file.name === rankItem.fileName)?.url ?? '',
         imageKey: res?.find(file => file.name === rankItem.fileName)?.key ?? ''
-      })));
+      })))
+    }).then(() => {
+      setNewRankItems([]);
+      router.refresh()
     });
+  }
+
+  function handleDeleteRankItem(rankItemId: number) {
+    deleteRankItem(rankItemId).then(() => router.refresh());
   }
 
   return (
@@ -148,6 +153,7 @@ export default function RankItemForm({ currentRankItems, rankingId, votes }: { c
                 <FaArrowDown /> {votes.filter(v => v.rankItemId === rankItem.id && v.type === 'downvote').length}
               </div>
             </div>
+            <Button onClick={() => handleDeleteRankItem(rankItem.id)}>Delete</Button>
           </div>
         ))}
       </div>

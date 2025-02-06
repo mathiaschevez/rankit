@@ -51,6 +51,14 @@ export async function insertRankItems(newRankItems: Omit<InsertRankItem, "userId
   })));
 }
 
+export async function deleteRankItem(rankItemId: number) {
+  const imageKeyToDelete = await db.delete(rankItems)
+    .where(eq(rankItems.id, rankItemId))
+    .returning({ imageKey: rankItems.imageKey });
+
+  await utapi.deleteFiles(imageKeyToDelete[0].imageKey);
+}
+
 // VOTES
 
 export async function getVotes(rankingId: number) {
