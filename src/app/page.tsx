@@ -1,4 +1,3 @@
-import Navbar from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { getRankings } from "@/server/queries";
 import Image from "next/image";
@@ -10,8 +9,7 @@ export default async function Home() {
   const rankings = await getRankings();
 
   return (
-    <div className="px-4">
-      <Navbar />
+    <div className="p-4">
       <Header text='Rankings' />
       <div className="flex w-full gap-4">
         {rankings.map((ranking) =>
@@ -26,7 +24,10 @@ export default async function Home() {
                 width={250}
                 height={250}
               />}
-              <div className="text-left w-full font-bold text-xl">{ranking.title}</div>
+              <div className="w-full">
+                <div className="font-bold text-xl">{ranking.title}</div>
+                {ranking.collaborative && <i className="text-blue-500">Collaborative</i>}
+              </div>
             </Card>
           </Link>)}
       </div>

@@ -5,12 +5,14 @@ import React, { useEffect, useState } from 'react'
 import { Input } from './ui/input';
 import Image from 'next/image';
 import { Button } from './ui/button';
-import { deleteRanking, deleteRankItem, insertRankItems } from '@/server/queries';
+import { deleteRanking, deleteRankItem, insertRankItems, updateRanking } from '@/server/queries';
 import { useUploadThing } from '@/utils/uploadthings';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { BouncingLoader } from './Loaders';
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
+import { Switch } from './ui/switch';
+import { Label } from './ui/label';
 
 function UploadSVG() {
   return (
@@ -37,11 +39,12 @@ const useUploadThingInputProps = (...args: Input) => {
   };
 };
 
-export default function RankItemForm({ currentRankItems, rankingId, votes }: { currentRankItems: SelectRankItem[], rankingId: string, votes: SelectVote[] }) {
+export default function EditRankingForm({ currentRankItems, rankingId, votes, collaborative }: { currentRankItems: SelectRankItem[], rankingId: string, votes: SelectVote[], collaborative: boolean }) {
   const router = useRouter();
 
   const [name, setName] = useState('');
   const [image, setImage] = useState<undefined | File>(undefined);
+  const [collaborativeMode, setCollaborativeMode] = useState(collaborative);
 
   const [imagesToUpload, setImagesToUpload] = useState<File[]>([]);
   const [newRankItems, setNewRankItems] = useState<NewRankItem[]>([]);
@@ -117,17 +120,23 @@ export default function RankItemForm({ currentRankItems, rankingId, votes }: { c
     setImage(undefined);
   }
 
-  function handleConfirmRankItems() {
-    startUpload(imagesToUpload).then((res) => {
-      insertRankItems(newRankItems.map(rankItem => ({
-        ...rankItem,
-        imageUrl: res?.find(file => file.name === rankItem.fileName)?.url ?? '',
-        imageKey: res?.find(file => file.name === rankItem.fileName)?.key ?? ''
-      })))
-    }).then(() => {
-      setNewRankItems([]);
-      router.refresh()
-    });
+  function handleConfirmUpdates() {
+    if (newRankItems.length !== 0) {
+      startUpload(imagesToUpload).then((res) => {
+        insertRankItems(newRankItems.map(rankItem => ({
+          ...rankItem,
+          imageUrl: res?.find(file => file.name === rankItem.fileName)?.url ?? '',
+          imageKey: res?.find(file => file.name === rankItem.fileName)?.key ?? ''
+        })))
+      }).then(() => {
+        setNewRankItems([]);
+        if (collaborative === collaborativeMode) router.refresh();
+      });
+    }
+    
+    if (collaborative !== collaborativeMode) {
+      updateRanking(collaborativeMode).then(() => router.refresh());
+    }
   }
 
   function handleDeleteRankItem(rankItemId: number) {
@@ -207,13 +216,29 @@ export default function RankItemForm({ currentRankItems, rankingId, votes }: { c
           </div>
         </div>
       </div>
-      {newRankItems.length !== 0 && <Button
-        onClick={handleConfirmRankItems}
-      >Confirm Rank Items</Button>}
-      <Button onClick={() => {
-        deleteRanking(Number(rankingId))
-          .then(() => router.replace('/'));
-      }}>Delete</Button>
+      <div className='flex '>
+        <div className='flex gap-2 items-center'>
+          <Switch
+            id="collaboartive-mode"
+            onCheckedChange={setCollaborativeMode}
+            checked={collaborativeMode}
+          />
+          <Label htmlFor="collaborative-mode">Collaborative Mode</Label>
+        </div>
+        <div className='flex gap-2 ml-auto'>
+          {<Button
+            className=''
+            disabled={(collaborativeMode === collaborative && newRankItems.length === 0)}
+            onClick={handleConfirmUpdates}
+          >Confirm Updates</Button>}
+          <Button
+            onClick={() => {
+              deleteRanking(Number(rankingId))
+                .then(() => router.replace('/'));
+            }}
+          >Delete</Button>
+        </div>
+      </div>
     </div>
   )
 }

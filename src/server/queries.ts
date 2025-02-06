@@ -16,6 +16,12 @@ export async function createRanking(data: InsertRanking) {
     .returning({ insertedId: rankings.id });
 }
 
+export async function updateRanking(collaborative: boolean) {
+  return await db.update(rankings).set({
+    collaborative: collaborative
+  });
+}
+
 export async function deleteRanking(idToDelete: number) {
   const rankItemList = await db.select().from(rankItems).where(eq(rankItems.rankingId, idToDelete));
   const imagesToDelete = rankItemList.map(item => item.imageKey);
@@ -52,6 +58,30 @@ export async function insertRankItems(newRankItems: Omit<InsertRankItem, "userId
 }
 
 export async function deleteRankItem(rankItemId: number) {
+  const imageKeyToDelete = await db.delete(rankItems)
+    .where(eq(rankItems.id, rankItemId))
+    .returning({ imageKey: rankItems.imageKey });
+
+  await utapi.deleteFiles(imageKeyToDelete[0].imageKey);
+}
+
+// PENDING RANK ITEMS
+
+export async function getPendingRankItems(rankingId: number) {
+  return await db.select().from(rankItems).where(eq(rankItems.rankingId, rankingId));
+}
+
+export async function insertPendingRankItem(newRankItems: Omit<InsertRankItem, "userId">[]) {
+  const { userId } = await auth();
+  if (!userId) return;
+
+  return await db.insert(rankItems).values(newRankItems.map(item => ({
+    userId,
+    ...item
+  })));
+}
+
+export async function deletePendingRankItem(rankItemId: number) {
   const imageKeyToDelete = await db.delete(rankItems)
     .where(eq(rankItems.id, rankItemId))
     .returning({ imageKey: rankItems.imageKey });

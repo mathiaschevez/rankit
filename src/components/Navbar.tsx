@@ -4,9 +4,9 @@ import React from 'react'
 
 export default function Navbar() {
   return (
-    <div className="flex justify-between h-16 items-center">
-      Rankit
-      <div className='flex self-end items-center gap-6'>
+    <div className="flex justify-between h-16 items-center px-4">
+      <Link href='/'>Rankit</Link>
+      <div className='flex self-end h-full items-center gap-6'>
         <SignedIn>
           <Link href='/create' className='py-2 px-6 bg-blue-600 rounded'>Create</Link>
           <UserButton

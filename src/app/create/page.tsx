@@ -94,10 +94,11 @@ export default function CreateRanking() {
       startUpload([uploadedImage])
         .then((res) => {
           createRanking({
+            title,
+            collaborative,
             userId: user.user.id,
-            title: title,
             coverImageUrl: res?.[0].url ?? '',
-            coverImageFileKey: res?.[0].key ?? ''
+            coverImageFileKey: res?.[0].key ?? '',
           }).then((res) => {
             const insertedId = res[0].insertedId;
             router.replace(`/ranking/${insertedId}`);
