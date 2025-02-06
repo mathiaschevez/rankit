@@ -10,6 +10,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label";
 
 type Input = Parameters<typeof useUploadThing>;
 
@@ -40,6 +42,7 @@ export default function CreateRanking() {
 
   const [title, setTitle] = useState('');
   const [uploadedImage, setUploadedImage] = useState<null | File>(null);
+  const [collaborative, setCollaborative] = useState(false);
 
   useEffect(function WarnOnReload() {
     const handleBeforeUnload = (event: Event) => {
@@ -129,12 +132,22 @@ export default function CreateRanking() {
           onChange={onImageImport}
           { ...inputProps }
         />
-        <Input
-          className=''
-          placeholder="Title"
-          onChange={(e) => setTitle(e.target.value)}
-          value={title}
-        />
+        <div className="w-full flex flex-col gap-4">
+          <Input
+            className=''
+            placeholder="Title"
+            onChange={(e) => setTitle(e.target.value)}
+            value={title}
+          />
+          <div className="flex space-x-2 items-center">
+            <Switch
+              id="collaboartive-mode"
+              onCheckedChange={setCollaborative}
+              checked={collaborative}
+            />
+            <Label htmlFor="collaborative-mode">Collaborative Mode</Label>
+          </div>
+        </div>
       </div>
       <Button
         disabled={!uploadedImage}
