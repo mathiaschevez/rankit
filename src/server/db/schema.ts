@@ -7,8 +7,8 @@ export const rankings = createTable('rankings', {
   id: serial('id').primaryKey(),
   title: text('title').notNull(),
   userId: varchar("userId", { length: 256 }).notNull(),
-  coverImageUrl: varchar("coverImageUrl", { length: 1024 }),
-  coverImageFileKey: varchar("imageKey", { length: 1024 }),
+  coverImageUrl: varchar("coverImageUrl", { length: 1024 }).notNull(),
+  coverImageFileKey: varchar("imageKey", { length: 1024 }).notNull(),
   createdAt: timestamp("createdAt", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),

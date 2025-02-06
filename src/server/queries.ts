@@ -4,6 +4,9 @@ import { and, eq } from 'drizzle-orm';
 import { db } from './db';
 import { InsertRanking, InsertRankItem, rankings, rankItems, SelectRanking, votes } from './db/schema';
 import { auth } from '@clerk/nextjs/server';
+import { UTApi } from 'uploadthing/server';
+
+const utapi = new UTApi();
 
 // RANKINGS
 
@@ -14,7 +17,14 @@ export async function createRanking(data: InsertRanking) {
 }
 
 export async function deleteRanking(idToDelete: number) {
-  return await db.delete(rankings).where(eq(rankings.id, idToDelete));
+  const rankItemList = await db.select().from(rankItems).where(eq(rankItems.rankingId, idToDelete));
+  const imagesToDelete = rankItemList.map(item => item.imageKey);
+
+  const coverImageKeysToDelete = await db.delete(rankings)
+    .where(eq(rankings.id, idToDelete))
+    .returning({ coverImageKey: rankings.coverImageFileKey })
+
+  await utapi.deleteFiles([...imagesToDelete, coverImageKeysToDelete[0].coverImageKey]);
 }
 
 export async function getRankings(): Promise<SelectRanking[]> {

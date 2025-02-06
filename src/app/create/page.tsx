@@ -93,8 +93,8 @@ export default function CreateRanking() {
           createRanking({
             userId: user.user.id,
             title: title,
-            coverImageUrl: res?.[0].url,
-            coverImageFileKey: res?.[0].key
+            coverImageUrl: res?.[0].url ?? '',
+            coverImageFileKey: res?.[0].key ?? ''
           }).then((res) => {
             const insertedId = res[0].insertedId;
             router.replace(`/ranking/${insertedId}`);
@@ -137,6 +137,7 @@ export default function CreateRanking() {
         />
       </div>
       <Button
+        disabled={!uploadedImage}
         onClick={onBeginUpload}
         className="py-6 px-8 text-lg mt-4"
       >Create</Button>
