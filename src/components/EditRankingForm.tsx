@@ -1,6 +1,6 @@
 'use client';
 
-import { SelectRankItem, SelectVote } from '@/server/db/schema'
+import { SelectRanking, SelectRankItem, SelectVote } from '@/server/db/schema'
 import React, { useEffect, useState } from 'react'
 import { Input } from './ui/input';
 import Image from 'next/image';
@@ -39,12 +39,14 @@ const useUploadThingInputProps = (...args: Input) => {
   };
 };
 
-export default function EditRankingForm({ currentRankItems, rankingId, votes, collaborative }: { currentRankItems: SelectRankItem[], rankingId: string, votes: SelectVote[], collaborative: boolean }) {
+export default function EditRankingForm({ currentRankItems, ranking, votes }: { currentRankItems: SelectRankItem[], ranking: SelectRanking, votes: SelectVote[] }) {
   const router = useRouter();
+
+  const [title, setTitle] = useState(ranking.title);
 
   const [name, setName] = useState('');
   const [image, setImage] = useState<undefined | File>(undefined);
-  const [collaborativeMode, setCollaborativeMode] = useState(collaborative);
+  const [collaborativeMode, setCollaborativeMode] = useState(ranking.collaborative);
 
   const [imagesToUpload, setImagesToUpload] = useState<File[]>([]);
   const [newRankItems, setNewRankItems] = useState<NewRankItem[]>([]);
@@ -110,7 +112,7 @@ export default function EditRankingForm({ currentRankItems, rankingId, votes, co
       setImagesToUpload([...imagesToUpload, image]);
       setNewRankItems([...newRankItems, {
         name,
-        rankingId: Number(rankingId),
+        rankingId: Number(ranking.id),
         fileName: image.name,
         imageUrl: URL.createObjectURL(image),
       }]);
@@ -130,12 +132,12 @@ export default function EditRankingForm({ currentRankItems, rankingId, votes, co
         })))
       }).then(() => {
         setNewRankItems([]);
-        if (collaborative === collaborativeMode) router.refresh();
+        if (ranking.collaborative === collaborativeMode) router.refresh();
       });
     }
     
-    if (collaborative !== collaborativeMode) {
-      updateRanking(collaborativeMode).then(() => router.refresh());
+    if (ranking.collaborative !== collaborativeMode || ranking.title !== title) {
+      updateRanking({ collaborative: collaborativeMode, title }).then(() => router.refresh());
     }
   }
 
@@ -147,6 +149,7 @@ export default function EditRankingForm({ currentRankItems, rankingId, votes, co
     <div className='p-4'>
       <div className='text-2xl font-bold mb-4'>Adding Rank Items</div>
       <div className='flex flex-col gap-4'>
+        <Input placeholder='New title' value={title} onChange={(e) => setTitle(e.target.value)} />
         {currentRankItems.map((rankItem, i) => (
           <div key={rankItem.name} className='flex w-full h-28 items-center gap-4'>
             <div>{i + 1}</div>
@@ -228,12 +231,12 @@ export default function EditRankingForm({ currentRankItems, rankingId, votes, co
         <div className='flex gap-2 ml-auto'>
           {<Button
             className=''
-            disabled={(collaborativeMode === collaborative && newRankItems.length === 0)}
+            disabled={(collaborativeMode === ranking.collaborative && newRankItems.length === 0 && title === ranking.title) || title === ''}
             onClick={handleConfirmUpdates}
           >Confirm Updates</Button>}
           <Button
             onClick={() => {
-              deleteRanking(Number(rankingId))
+              deleteRanking(Number(ranking.id))
                 .then(() => router.replace('/'));
             }}
           >Delete</Button>

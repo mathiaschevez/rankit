@@ -12,9 +12,8 @@ export default async function AddRankItem({ params }: { params: Promise<{id: str
     <div>
       <EditRankingForm
         currentRankItems={currentRankItems}
-        rankingId={rankingId}
+        ranking={ranking}
         votes={votes}
-        collaborative={ranking.collaborative}
       />
     </div>
   )
