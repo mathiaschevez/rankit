@@ -93,7 +93,8 @@ export default function CreateRanking() {
           createRanking({
             userId: user.user.id,
             title: title,
-            coverImageUrl: res?.[0].url
+            coverImageUrl: res?.[0].url,
+            coverImageFileKey: res?.[0].key
           }).then((res) => {
             const insertedId = res[0].insertedId;
             router.replace(`/ranking/${insertedId}`);

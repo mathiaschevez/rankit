@@ -38,7 +38,8 @@ const useUploadThingInputProps = (...args: Input) => {
 };
 
 export default function RankItemForm({ currentRankItems, rankingId, votes }: { currentRankItems: SelectRankItem[], rankingId: string, votes: SelectVote[] }) {
-  const router = useRouter()
+  const router = useRouter();
+
   const [name, setName] = useState('');
   const [image, setImage] = useState<undefined | File>(undefined);
 
@@ -87,29 +88,43 @@ export default function RankItemForm({ currentRankItems, rankingId, votes }: { c
 
   const onImageImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-    setImage(e.target.files[0]);
+
+    if (
+      imagesToUpload.find(f => f.name === e.target.files?.[0].name) ||
+      currentRankItems.find(f => f.fileName === e.target.files?.[0].name)
+    ) {
+      alert('Cannot use the same image');
+    } else {
+      setImage(e.target.files[0]);
+    }
+
+    e.target.value = ''
   };
 
   function handleAddRankItem() {
     if (image === undefined) return;
-    
-    setImagesToUpload([...imagesToUpload, image]);
-    setNewRankItems([...newRankItems, {
-      name,
-      rankingId: Number(rankingId),
-      fileName: image.name,
-      imageUrl: URL.createObjectURL(image),
-    }]);
+    else {
+      setImagesToUpload([...imagesToUpload, image]);
+      setNewRankItems([...newRankItems, {
+        name,
+        rankingId: Number(rankingId),
+        fileName: image.name,
+        imageUrl: URL.createObjectURL(image),
+      }]);
+    }
 
     setName('');
     setImage(undefined);
+
+    router.refresh();
   }
 
   function handleConfirmRankItems() {
     startUpload(imagesToUpload).then((res) => {
       insertRankItems(newRankItems.map(rankItem => ({
         ...rankItem,
-        imageUrl: res?.find(file => file.name === rankItem.fileName)?.url ?? ''
+        imageUrl: res?.find(file => file.name === rankItem.fileName)?.url ?? '',
+        imageKey: res?.find(file => file.name === rankItem.fileName)?.key ?? ''
       })));
     });
   }
@@ -190,7 +205,8 @@ export default function RankItemForm({ currentRankItems, rankingId, votes }: { c
         onClick={handleConfirmRankItems}
       >Confirm Rank Items</Button>}
       <Button onClick={() => {
-        deleteRanking(Number(rankingId)).then(() => router.replace('/'));
+        deleteRanking(Number(rankingId))
+          .then(() => router.replace('/'));
       }}>Delete</Button>
     </div>
   )

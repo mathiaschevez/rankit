@@ -19,9 +19,14 @@ export default async function Home() {
             key={ranking.id}
             href={`/ranking/${ranking.id}`}
           >
-            <Card className="border-2 w-72 h-72 p-4">
-              {ranking.coverImageUrl && <Image alt='coverImg' src={ranking.coverImageUrl} width={300} height={300} /> }
-              {ranking.title}
+            <Card className="flex flex-col justify-center border-2 w-[300px] h-[330px] p-4 gap-4 items-center">
+              {ranking.coverImageUrl && <Image
+                alt='coverImg'
+                src={ranking.coverImageUrl}
+                width={250}
+                height={250}
+              />}
+              <div className="text-left w-full font-bold text-xl">{ranking.title}</div>
             </Card>
           </Link>)}
       </div>

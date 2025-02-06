@@ -8,6 +8,7 @@ export const rankings = createTable('rankings', {
   title: text('title').notNull(),
   userId: varchar("userId", { length: 256 }).notNull(),
   coverImageUrl: varchar("coverImageUrl", { length: 1024 }),
+  coverImageFileKey: varchar("imageKey", { length: 1024 }),
   createdAt: timestamp("createdAt", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -20,6 +21,7 @@ export const rankItems = createTable('rankItems', {
   fileName: varchar("fileName", { length: 256 }).notNull(),
   rankingId: integer("rankingId").notNull(),
   imageUrl: varchar("imageUrl", { length: 1024 }).notNull(),
+  imageKey: varchar("imageKey", { length: 1024 }).notNull(),
   name: text('name').notNull(),
   createdAt: timestamp("createdAt", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
