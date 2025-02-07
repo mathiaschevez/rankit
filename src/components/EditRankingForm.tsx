@@ -1,16 +1,15 @@
 'use client';
 
-import { SelectRanking, SelectRankItem, SelectVote } from '@/server/db/schema'
+import { SelectRanking, SelectRankItem } from '@/server/db/schema'
 import React, { useEffect, useState } from 'react'
 import { Input } from './ui/input';
 import Image from 'next/image';
 import { Button } from './ui/button';
-import { deleteRanking, deleteRankItem, insertRankItems, updateRanking } from '@/server/queries';
+import { deleteRanking, deleteRankItem, insertPendingRankItem, insertRankItems, updateRanking } from '@/server/queries';
 import { useUploadThing } from '@/utils/uploadthings';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { BouncingLoader } from './Loaders';
-import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 
@@ -39,8 +38,9 @@ const useUploadThingInputProps = (...args: Input) => {
   };
 };
 
-export default function EditRankingForm({ currentRankItems, ranking, votes }: { currentRankItems: SelectRankItem[], ranking: SelectRanking, votes: SelectVote[] }) {
+export default function EditRankingForm({ currentRankItems, ranking, userId }: { currentRankItems: SelectRankItem[], ranking: SelectRanking, userId: string }) {
   const router = useRouter();
+  const isCollaborator = userId !== ranking.userId;
 
   const [title, setTitle] = useState(ranking.title);
 
@@ -98,7 +98,7 @@ export default function EditRankingForm({ currentRankItems, ranking, votes }: { 
       imagesToUpload.find(f => f.name === e.target.files?.[0].name) ||
       currentRankItems.find(f => f.fileName === e.target.files?.[0].name)
     ) {
-      alert('Cannot use the same image');
+      alert('This image is already in use.');
     } else {
       setImage(e.target.files[0]);
     }
@@ -124,8 +124,9 @@ export default function EditRankingForm({ currentRankItems, ranking, votes }: { 
 
   function handleConfirmUpdates() {
     if (newRankItems.length !== 0) {
+      const functionToUse = isCollaborator ? insertPendingRankItem : insertRankItems;
       startUpload(imagesToUpload).then((res) => {
-        insertRankItems(newRankItems.map(rankItem => ({
+        functionToUse(newRankItems.map(rankItem => ({
           ...rankItem,
           imageUrl: res?.find(file => file.name === rankItem.fileName)?.url ?? '',
           imageKey: res?.find(file => file.name === rankItem.fileName)?.key ?? ''
@@ -147,7 +148,7 @@ export default function EditRankingForm({ currentRankItems, ranking, votes }: { 
 
   return (
     <div className='p-4'>
-      <div className='text-2xl font-bold mb-4'>Adding Rank Items</div>
+      <div className='text-2xl font-bold mb-4'>Editing Ranking</div>
       <div className='flex flex-col gap-4'>
         <Input placeholder='New title' value={title} onChange={(e) => setTitle(e.target.value)} />
         {currentRankItems.map((rankItem, i) => (
@@ -157,15 +158,10 @@ export default function EditRankingForm({ currentRankItems, ranking, votes }: { 
               <Image alt="rankItemImage" src={rankItem.imageUrl} width={600} height={300} />
             </div>
             <div className='text-xl'>{rankItem.name}</div>
-            <div className='flex gap-2 ml-auto'>
-              <div className='font-bold text-green-500 text-xl flex items-center gap-2'>
-                <FaArrowUp /> {votes.filter(v => v.rankItemId === rankItem.id && v.type === 'upvote').length}
-              </div>
-              <div className='font-bold text-xl text-orange-500 flex items-center gap-2'>
-                <FaArrowDown /> {votes.filter(v => v.rankItemId === rankItem.id && v.type === 'downvote').length}
-              </div>
-            </div>
-            <Button onClick={() => handleDeleteRankItem(rankItem.id)}>Delete</Button>
+            {userId === ranking.userId && <Button
+              className='ml-auto'
+              onClick={() => handleDeleteRankItem(rankItem.id)}
+            >Delete</Button>}
           </div>
         ))}
       </div>
@@ -219,21 +215,21 @@ export default function EditRankingForm({ currentRankItems, ranking, votes }: { 
           </div>
         </div>
       </div>
-      <div className='flex '>
-        <div className='flex gap-2 items-center'>
+      <div className='flex'>
+        {userId === ranking.userId && <div className='flex gap-2 items-center'>
           <Switch
             id="collaboartive-mode"
             onCheckedChange={setCollaborativeMode}
             checked={collaborativeMode}
           />
           <Label htmlFor="collaborative-mode">Collaborative Mode</Label>
-        </div>
+        </div>}
         <div className='flex gap-2 ml-auto'>
           {<Button
             className=''
             disabled={(collaborativeMode === ranking.collaborative && newRankItems.length === 0 && title === ranking.title) || title === ''}
             onClick={handleConfirmUpdates}
-          >Confirm Updates</Button>}
+          >Confirm {isCollaborator ? 'Update Request' : 'Updates'}</Button>}
           <Button
             onClick={() => {
               deleteRanking(Number(ranking.id))

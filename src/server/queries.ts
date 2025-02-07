@@ -2,7 +2,7 @@
 
 import { and, eq } from 'drizzle-orm';
 import { db } from './db';
-import { InsertRanking, InsertRankItem, rankings, rankItems, SelectRanking, votes } from './db/schema';
+import { InsertRanking, InsertRankItem, pendingRankItems, rankings, rankItems, SelectRanking, votes } from './db/schema';
 import { auth } from '@clerk/nextjs/server';
 import { UTApi } from 'uploadthing/server';
 
@@ -66,23 +66,23 @@ export async function deleteRankItem(rankItemId: number) {
 // PENDING RANK ITEMS
 
 export async function getPendingRankItems(rankingId: number) {
-  return await db.select().from(rankItems).where(eq(rankItems.rankingId, rankingId));
+  return await db.select().from(pendingRankItems).where(eq(pendingRankItems.rankingId, rankingId));
 }
 
 export async function insertPendingRankItem(newRankItems: Omit<InsertRankItem, "userId">[]) {
   const { userId } = await auth();
   if (!userId) return;
 
-  return await db.insert(rankItems).values(newRankItems.map(item => ({
+  return await db.insert(pendingRankItems).values(newRankItems.map(item => ({
     userId,
     ...item
   })));
 }
 
 export async function deletePendingRankItem(rankItemId: number) {
-  const imageKeyToDelete = await db.delete(rankItems)
-    .where(eq(rankItems.id, rankItemId))
-    .returning({ imageKey: rankItems.imageKey });
+  const imageKeyToDelete = await db.delete(pendingRankItems)
+    .where(eq(pendingRankItems.id, rankItemId))
+    .returning({ imageKey: pendingRankItems.imageKey });
 
   await utapi.deleteFiles(imageKeyToDelete[0].imageKey);
 }

@@ -13,8 +13,8 @@ export default function Navbar() {
             appearance={{
               elements: {
                 userButtonAvatarBox: "w-9 h-9"
-              }}
-            }
+              }
+            }}
           />
         </SignedIn>
         <SignedOut>

@@ -93,3 +93,6 @@ export type SelectRankItem = typeof rankItems.$inferSelect
 
 export type InsertRanking = typeof rankings.$inferInsert;
 export type SelectRanking = typeof rankings.$inferSelect;
+
+export type InsertPendingRankItem = typeof pendingRankItems.$inferInsert
+export type SelectPendingRankItem = typeof pendingRankItems.$inferSelect;
