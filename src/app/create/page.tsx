@@ -110,7 +110,7 @@ export default function CreateRanking() {
   return (
     <div className="p-4">
       <div className="font-bold text-3xl mb-4">Create</div>
-      <div className="flex gap-4">
+      <div className="flex flex-col md:flex-row gap-4">
         <label
           className="flex cursor-pointer relative min-h-80 min-w-80 max-h-80 max-w-80 border border-white overflow-hidden"
           htmlFor="upload-button"
@@ -153,7 +153,7 @@ export default function CreateRanking() {
       <Button
         disabled={!uploadedImage}
         onClick={onBeginUpload}
-        className="py-6 px-8 text-lg mt-4"
+        className="py-3 px-5 md:py-6 md:px-8 md:text-lg mt-4"
       >Create</Button>
     </div>
   )

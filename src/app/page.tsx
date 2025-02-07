@@ -11,7 +11,7 @@ export default async function Home() {
   return (
     <div className="p-4">
       <Header text='Rankings' />
-      <div className="flex w-full gap-4">
+      <div className="flex flex-wrap items-center justify-center md:justify-normal w-full gap-4">
         {rankings.map((ranking) =>
           <Link
             key={ranking.id}

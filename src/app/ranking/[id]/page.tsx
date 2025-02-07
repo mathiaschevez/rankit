@@ -16,8 +16,8 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
   const votes = await getVotes(Number(rankingId));
 
   return (
-    <div className='flex flex-col p-4'>
-      <div className='flex gap-4'>
+    <div className='flex flex-col gap-4 p-4'>
+      <div className='flex flex-col md:flex-row gap-4'>
         <div className='flex flex-col gap-4'>
           {ranking.coverImageUrl && <Image alt='cover img' src={ranking.coverImageUrl} width={900} height={900} />}
           <div className='font-bold text-2xl'>{ranking.title}</div>
@@ -33,12 +33,13 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
               userId={userId}
             />)}
           </div>
-          {(userId === ranking.userId || ranking.collaborative) && <Link href={`/ranking/${rankingId}/edit-ranking`}>
-            <Button>Edit Ranking</Button>
+          {userId && (userId === ranking.userId || ranking.collaborative) && <Link href={`/ranking/${rankingId}/edit-ranking`}>
+            <Button className='mt-4'>Edit Ranking</Button>
           </Link>}
         </div>
       </div>
-      {ranking.collaborative && <div>
+      {ranking.collaborative && pendingRankItems.length > 0 && <div>
+        <div>Pending Rank Items</div>
         {pendingRankItems.map((rankItem, i) => <PendingRankItem
           key={rankItem.id}
           index={i + 1}
