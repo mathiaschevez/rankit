@@ -150,7 +150,9 @@ export default function EditRankingForm({ currentRankItems, ranking, userId }: {
     <div className='p-4'>
       <div className='text-2xl font-bold mb-4'>Editing Ranking</div>
       <div className='flex flex-col gap-4'>
-        <Input placeholder='New title' value={title} onChange={(e) => setTitle(e.target.value)} />
+        {userId === ranking.userId ?
+          <Input placeholder='New title' value={title} onChange={(e) => setTitle(e.target.value)} /> :
+          <div className='font-bold text-2xl'>{ranking.title}</div>}
         {currentRankItems.map((rankItem, i) => (
           <div key={rankItem.name} className='flex w-full h-28 items-center gap-4'>
             <div>{i + 1}</div>
