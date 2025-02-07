@@ -80,11 +80,9 @@ export async function insertPendingRankItem(newRankItems: Omit<InsertRankItem, "
 }
 
 export async function deletePendingRankItem(rankItemId: number) {
-  const imageKeyToDelete = await db.delete(pendingRankItems)
+  return await db.delete(pendingRankItems)
     .where(eq(pendingRankItems.id, rankItemId))
     .returning({ imageKey: pendingRankItems.imageKey });
-
-  await utapi.deleteFiles(imageKeyToDelete[0].imageKey);
 }
 
 // VOTES
