@@ -233,12 +233,12 @@ export default function EditRankingForm({ currentRankItems, ranking, userId }: {
             disabled={(collaborativeMode === ranking.collaborative && newRankItems.length === 0 && title === ranking.title) || title === ''}
             onClick={handleConfirmUpdates}
           >Confirm {isCollaborator ? 'Update Request' : 'Updates'}</Button>}
-          <Button
+          {userId === ranking.userId && <Button
             onClick={() => {
               deleteRanking(Number(ranking.id))
                 .then(() => router.replace('/'));
             }}
-          >Delete</Button>
+          >Delete</Button>}
         </div>
       </div>
     </div>
