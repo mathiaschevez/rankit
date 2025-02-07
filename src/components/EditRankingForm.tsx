@@ -196,10 +196,11 @@ export default function EditRankingForm({ currentRankItems, ranking, userId }: {
         <input
           id="upload-button"
           type="file"
+          accept="image/*"
           className="sr-only"
           onChange={onImageImport}
         />
-        <div className='flex gap-2 w-full'>
+        <div className='flex flex-col md:flex-row gap-2 w-full'>
           <Input
             className='flex-1'
             placeholder='name'
