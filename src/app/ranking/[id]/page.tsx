@@ -15,6 +15,17 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
   const pendingRankItems = await getPendingRankItems(Number(rankingId));
   const votes = await getVotes(Number(rankingId));
 
+  function rankItemsSortedByScore() {
+    return rankItems.map(ri => {
+      const rankItemVotes = votes.filter(v => v.rankItemId === ri.id);
+      const score = rankItemVotes.filter(v => v.type === 'upvote').length ?? 1 / rankItemVotes.filter(v => v.type === 'downvote').length ?? 1
+      return { ...ri, rankItemVotes, score }
+    }).sort((a, b) => {
+      if (b.score === a.score) return b.rankItemVotes.length - a.rankItemVotes.length;
+      return b.score - a.score;
+    })
+  }
+
   return (
     <div className='flex flex-col gap-4 p-4'>
       <div className='flex flex-col md:flex-row gap-4'>
@@ -25,11 +36,10 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
         </div>
         <div className='w-full'>
           <div className='flex flex-col w-full'>
-            {rankItems.map((rankItem, i) => <RankItem
+            {rankItemsSortedByScore().map((rankItem, i) => <RankItem
               key={rankItem.id}
               rankItem={rankItem}
               index={i + 1}
-              votes={votes.filter(v => v.rankItemId === rankItem.id)}
               userId={userId}
             />)}
           </div>

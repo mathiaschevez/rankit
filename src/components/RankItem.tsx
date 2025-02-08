@@ -7,9 +7,17 @@ import { useRouter } from 'next/navigation';
 import React from 'react'
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa'
 
-export default function RankItem({ rankItem, index, votes, userId }: { rankItem: SelectRankItem, index: number, votes: SelectVote[], userId: string | null }) {
+interface RankItemWithScore extends SelectRankItem {
+  score: number,
+  rankItemVotes: SelectVote[]
+}
+
+export default function RankItem({ rankItem, index, userId }: { rankItem: RankItemWithScore, index: number, userId: string | null }) {
   const router = useRouter();
-  const currentVote = votes.find(v => v.userId === userId);
+  const currentVote = rankItem.rankItemVotes.find(v => v.userId === userId);
+
+  const upvoteDisabled = !userId || (currentVote && currentVote.type === 'upvote');
+  const downvoteDisabled = !userId || (currentVote && currentVote.type === 'downvote')
 
   function handleVote(type: 'upvote' | 'downvote') {
     if (!userId) return;
@@ -27,19 +35,20 @@ export default function RankItem({ rankItem, index, votes, userId }: { rankItem:
       <Image alt="rankItemImage" src={rankItem.imageUrl} width={50} height={50} />
       <div className='text-xl flex-1'>{rankItem.name}</div>
       <div className='flex gap-2 ml-auto'>
+        {/* <div>{rankItem.score}</div> */}
         <button
-          disabled={!userId || (currentVote && currentVote.type === 'upvote')}
-          className='font-bold text-green-500 text-xl flex items-center gap-2'
+          disabled={upvoteDisabled}
+          className={`${!upvoteDisabled && 'hover:text-green-300'} text-green-500 font-bold text-xl flex items-center gap-2`}
           onClick={() => handleVote('upvote')}
         >
-          <FaArrowUp /> {votes.filter(v => v.type === 'upvote').length}
+          <FaArrowUp /> {rankItem.rankItemVotes.filter(v => v.type === 'upvote').length}
         </button>
         <button
-          disabled={!userId || (currentVote && currentVote.type === 'downvote')}
-          className='font-bold text-xl text-orange-500 flex items-center gap-2'
+          disabled={downvoteDisabled}
+          className={`${!downvoteDisabled && 'hover:text-orange-300'} text-orange-500 font-bold text-xl flex items-center gap-2`}
           onClick={() => handleVote('downvote')}
         >
-          <FaArrowDown /> {votes.filter(v => v.type === 'downvote').length}
+          <FaArrowDown /> {rankItem.rankItemVotes.filter(v => v.type === 'downvote').length}
         </button>
       </div>
     </div>
