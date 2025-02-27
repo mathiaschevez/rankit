@@ -34,7 +34,6 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
           {ranking.coverImageUrl && <Image alt='cover img' src={ranking.coverImageUrl} width={900} height={900} />}
           <div className='font-bold text-2xl'>{ranking.title}</div>
           {ranking.collaborative && <i className='text-blue-500'>Collaborative</i>}
-          {!userId && <i>Sign in to vote!</i>}
         </div>
         <div className='w-full'>
           <div className='flex flex-col w-full'>

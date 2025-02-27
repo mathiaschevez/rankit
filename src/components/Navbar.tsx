@@ -18,6 +18,7 @@ export default function Navbar() {
           />
         </SignedIn>
         <SignedOut>
+          <i>Sign in to vote and create a ranking!</i>
           <SignInButton>
             <div className="bg-blue-600 py-2 px-4 rounded text-white cursor-pointer">Sign In</div>
           </SignInButton>
