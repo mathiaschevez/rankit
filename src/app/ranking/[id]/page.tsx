@@ -2,7 +2,6 @@ import PendingRankItem from '@/components/PendingRankItem';
 import RankItem from '@/components/RankItem';
 import { Button } from '@/components/ui/button';
 import { fetchRankingById, getPendingRankItems, getRankItems, getVotes } from '@/server/queries';
-import { SignedOut } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
 import Image from 'next/image';
 import Link from 'next/link';
