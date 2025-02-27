@@ -2,6 +2,7 @@ import PendingRankItem from '@/components/PendingRankItem';
 import RankItem from '@/components/RankItem';
 import { Button } from '@/components/ui/button';
 import { fetchRankingById, getPendingRankItems, getRankItems, getVotes } from '@/server/queries';
+import { SignedOut } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -33,6 +34,7 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
           {ranking.coverImageUrl && <Image alt='cover img' src={ranking.coverImageUrl} width={900} height={900} />}
           <div className='font-bold text-2xl'>{ranking.title}</div>
           {ranking.collaborative && <i className='text-blue-500'>Collaborative</i>}
+          {!userId && <i>Sign in to vote!</i>}
         </div>
         <div className='w-full'>
           <div className='flex flex-col w-full'>
