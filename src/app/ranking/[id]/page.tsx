@@ -43,8 +43,11 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
               userId={userId}
             />)}
           </div>
-          {userId && (userId === ranking.userId || ranking.collaborative) && <Link href={`/ranking/${rankingId}/edit-ranking`}>
+          {userId && (userId === ranking.userId) && <Link href={`/ranking/${rankingId}/edit-ranking`}>
             <Button className='mt-4'>Edit Ranking</Button>
+          </Link>}
+          {userId && ranking.collaborative && <Link href={`/ranking/${rankingId}/edit-ranking`}>
+            <Button className='mt-4'>Add Rank Item</Button>
           </Link>}
         </div>
       </div>

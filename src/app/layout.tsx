@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ClerkProvider } from '@clerk/nextjs'
+import { ClerkProvider, SignedOut } from '@clerk/nextjs'
 import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/Navbar";
 
@@ -19,6 +19,11 @@ export default function RootLayout({
       <html lang="en">
         <body className="dark">
           <Navbar />
+          <SignedOut>
+            <div className="flex absolute right-0 mr-4">
+              <i className='text-xs md:text-sm'>Sign in to vote and create!</i>
+            </div>
+          </SignedOut>
           <main>{children}</main>
           <Toaster />
         </body>
