@@ -6,8 +6,6 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation';
 import React from 'react'
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa'
-import { useEffect } from 'react';
-import io from 'socket.io-client';
 
 interface RankItemWithScore extends SelectRankItem {
   score: number,
@@ -30,18 +28,6 @@ export default function RankItem({ rankItem, index, userId }: { rankItem: RankIt
       type
     }).then(() => router.refresh());
   }
-
-  useEffect(() => {
-    const socket = io();
-    
-    socket.on('connect', () => {
-      console.log('Connected to server');
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
 
   return (
     <div className='flex w-full h-20 items-center gap-4'>
