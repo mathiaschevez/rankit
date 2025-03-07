@@ -1,19 +1,19 @@
 'use client';
 
-import { SelectRankItem, SelectVote } from '@/server/db/schema'
-import { insertVote } from '@/server/queries';
+import { Vote } from '@/app/redux/votes';
+import socket from '@/app/socket';
+import { SelectRankItem } from '@/server/db/schema'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation';
 import React from 'react'
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa'
+import { v4 as uuidv4 } from 'uuid';
 
 interface RankItemWithScore extends SelectRankItem {
   score: number,
-  rankItemVotes: SelectVote[]
+  rankItemVotes: Vote[]
 }
 
 export default function RankItem({ rankItem, index, userId }: { rankItem: RankItemWithScore, index: number, userId: string | null }) {
-  const router = useRouter();
   const currentVote = rankItem.rankItemVotes.find(v => v.userId === userId);
 
   const upvoteDisabled = !userId || (currentVote && currentVote.type === 'upvote');
@@ -21,12 +21,16 @@ export default function RankItem({ rankItem, index, userId }: { rankItem: RankIt
 
   function handleVote(type: 'upvote' | 'downvote') {
     if (!userId) return;
-    insertVote({
-      userId,
-      rankItemId: rankItem.id,
-      rankingId: rankItem.rankingId,
-      type
-    }).then(() => router.refresh());
+    if (currentVote) socket.emit('vote', { ...currentVote, type });
+    else {
+      socket.emit('vote', {
+        voteId: uuidv4(),
+        userId,
+        rankItemId: rankItem.id,
+        rankingId: rankItem.rankingId,
+        type,
+      });
+    }
   }
 
   return (

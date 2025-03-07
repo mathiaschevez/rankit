@@ -1,6 +1,6 @@
 'use server';
 
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { db } from './db';
 import { InsertRanking, InsertRankItem, pendingRankItems, rankings, rankItems, SelectRanking, votes } from './db/schema';
 import { auth } from '@clerk/nextjs/server';
@@ -89,17 +89,4 @@ export async function deletePendingRankItem(rankItemId: number) {
 
 export async function getVotes(rankingId: number) {
   return await db.select().from(votes).where(eq(votes.rankingId, rankingId));
-}
-
-export async function insertVote({ userId, rankingId, rankItemId, type }: { userId: string, rankingId: number, rankItemId: number, type: 'upvote' | 'downvote' }) {
-  const exists = (await db.select().from(votes).where(and(eq(votes.rankItemId, rankItemId), eq(votes.userId, userId)))).length > 0
-
-  if (exists) {
-    return await db.update(votes)
-      .set({ type })
-      .where(and(eq(votes.rankItemId, rankItemId), eq(votes.userId, userId)))
-  } else {
-    return await db.insert(votes)
-      .values({ userId, rankingId, rankItemId, type })
-  }
 }

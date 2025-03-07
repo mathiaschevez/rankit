@@ -1,7 +1,8 @@
+import { fetchVotes } from '@/app/api/votes';
 import PendingRankItem from '@/components/PendingRankItem';
-import RankItem from '@/components/RankItem';
+import RankItems from '@/components/RankItems';
 import { Button } from '@/components/ui/button';
-import { fetchRankingById, getPendingRankItems, getRankItems, getVotes } from '@/server/queries';
+import { fetchRankingById, getPendingRankItems, getRankItems } from '@/server/queries';
 import { auth } from '@clerk/nextjs/server';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -13,18 +14,7 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
   const ranking = (await fetchRankingById(Number(rankingId)))[0];
   const rankItems = await getRankItems(Number(rankingId));
   const pendingRankItems = await getPendingRankItems(Number(rankingId));
-  const votes = await getVotes(Number(rankingId));
-
-  function rankItemsSortedByScore() {
-    return rankItems.map(ri => {
-      const rankItemVotes = votes.filter(v => v.rankItemId === ri.id);
-      const score = rankItemVotes.filter(v => v.type === 'upvote').length ?? 1 / rankItemVotes.filter(v => v.type === 'downvote').length ?? 1
-      return { ...ri, rankItemVotes, score }
-    }).sort((a, b) => {
-      if (b.score === a.score) return b.rankItemVotes.length - a.rankItemVotes.length;
-      return b.score - a.score;
-    })
-  }
+  const initialVotes = await fetchVotes();
 
   return (
     <div className='flex flex-col gap-4 p-4'>
@@ -35,14 +25,12 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
           {ranking.collaborative && <i className='text-blue-500'>Collaborative</i>}
         </div>
         <div className='w-full'>
-          <div className='flex flex-col w-full'>
-            {rankItemsSortedByScore().map((rankItem, i) => <RankItem
-              key={rankItem.id}
-              rankItem={rankItem}
-              index={i + 1}
-              userId={userId}
-            />)}
-          </div>
+          <RankItems
+            rankItems={rankItems}
+            userId={userId}
+            rankingId={rankingId}
+            initialVotes={initialVotes}
+          />
           {userId && (userId === ranking.userId) && <Link href={`/ranking/${rankingId}/edit-ranking`}>
             <Button className='mt-4'>Edit Ranking</Button>
           </Link>}
