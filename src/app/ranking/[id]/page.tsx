@@ -14,7 +14,7 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
   const ranking = (await fetchRankingById(Number(rankingId)))[0];
   const rankItems = await getRankItems(Number(rankingId));
   const pendingRankItems = await getPendingRankItems(Number(rankingId));
-  const initialVotes = await fetchVotes();
+  const initialVotes = await fetchVotes(rankingId);
 
   return (
     <div className='flex flex-col gap-4 p-4'>

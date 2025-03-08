@@ -25,13 +25,13 @@ export default function RankItems({ initialVotes, rankItems, userId, rankingId }
 
   useEffect(() => {
     dispatch(initVotes(initialVotes));
-    // socket.emit('listenForVotes', rankingId);
+    socket.emit('listenForVotes', rankingId);
     socket.on('vote', (vote) => dispatch(addVote(vote)));
 
     return () => {
       socket.off('vote', (vote) => dispatch(addVote(vote)))
     }
-  }, [dispatch, initialVotes]);
+  }, [dispatch, initialVotes, rankingId]);
 
   const rankItemsSortedByScore = useMemo(() => {
     const filteredVotes = votes.filter(v => v.rankingId.toString() === rankingId);
