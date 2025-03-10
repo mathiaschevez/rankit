@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { type TypedUseSelectorHook, useSelector as useUnsafeSelector, useDispatch as useUnsafeDispatch, useStore as useUnsafeStore } from "react-redux";
-import votesReducer from './votes'
+import votesReducer from './votes';
+import userReducer from './user';
 
 export const store = configureStore({
   reducer: {
+    user: userReducer,
     votes: votesReducer,
   }
 })

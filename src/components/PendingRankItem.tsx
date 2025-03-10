@@ -5,9 +5,11 @@ import Image from "next/image";
 import { Button } from "./ui/button";
 import { deletePendingRankItem, insertRankItems } from "@/server/queries";
 import { useRouter } from "next/navigation";
+import { useSelector } from "@/app/redux/store";
 
-export default function PendingRankItem({ pendingRankItem, index, userId, rankingUserId }: { pendingRankItem: SelectPendingRankItem, index: number, userId: string, rankingUserId: string }) {
+export default function PendingRankItem({ pendingRankItem, index, rankingUserId }: { pendingRankItem: SelectPendingRankItem, index: number, rankingUserId: string }) {
   const router = useRouter();
+  const user = useSelector(state => state.user)
 
   function handleAcceptRankItem(pendingRankItem: SelectPendingRankItem) {
     insertRankItems([{
@@ -30,7 +32,7 @@ export default function PendingRankItem({ pendingRankItem, index, userId, rankin
       <div>{index}</div>
       <Image alt="rankItemImage" src={pendingRankItem.imageUrl} width={50} height={50} />
       <div className='text-xl flex-1'>{pendingRankItem.name}</div>
-      {userId === rankingUserId ? <div className="flex gap-4">
+      {user.user?.userId === rankingUserId ? <div className="flex gap-4">
         <Button onClick={() => handleDeclineRankitem(pendingRankItem.id)}>Decline</Button>
         <Button onClick={() => handleAcceptRankItem(pendingRankItem)}>Accept</Button>
       </div> : <i className="text-slate-500">Pending</i>}

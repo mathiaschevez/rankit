@@ -39,7 +39,6 @@ export const votesSlice = createSlice({
   },
 })
 
-// Action creators are generated for each case reducer function
 export const { initVotes, addVote } = votesSlice.actions
 
 export default votesSlice.reducer

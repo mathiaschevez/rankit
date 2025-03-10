@@ -1,5 +1,6 @@
 'use client';
 
+import { useSelector } from '@/app/redux/store';
 import { Vote } from '@/app/redux/votes';
 import socket from '@/app/socket';
 import { SelectRankItem } from '@/server/db/schema'
@@ -13,19 +14,20 @@ interface RankItemWithScore extends SelectRankItem {
   rankItemVotes: Vote[]
 }
 
-export default function RankItem({ rankItem, index, userId }: { rankItem: RankItemWithScore, index: number, userId: string | null }) {
-  const currentVote = rankItem.rankItemVotes.find(v => v.userId === userId);
+export default function RankItem({ rankItem, index }: { rankItem: RankItemWithScore, index: number }) {
+  const user = useSelector(state => state.user.user)
+  const currentVote = rankItem.rankItemVotes.find(v => v.userId === user?.userId);
 
-  const upvoteDisabled = !userId || (currentVote && currentVote.type === 'upvote');
-  const downvoteDisabled = !userId || (currentVote && currentVote.type === 'downvote')
+  const upvoteDisabled = !user?.userId || (currentVote && currentVote.type === 'upvote');
+  const downvoteDisabled = !user?.userId || (currentVote && currentVote.type === 'downvote')
 
   function handleVote(type: 'upvote' | 'downvote') {
-    if (!userId) return;
+    if (!user?.userId) return;
     if (currentVote) socket.emit('vote', { ...currentVote, type });
     else {
       socket.emit('vote', {
         voteId: uuidv4(),
-        userId,
+        userId: user?.userId,
         rankItemId: rankItem.id,
         rankingId: rankItem.rankingId,
         type,

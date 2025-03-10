@@ -1,15 +1,17 @@
+import { fetchUser } from '@/app/api/users';
 import { fetchVotes } from '@/app/api/votes';
 import PendingRankItem from '@/components/PendingRankItem';
 import RankItems from '@/components/RankItems';
 import { Button } from '@/components/ui/button';
 import { fetchRankingById, getPendingRankItems, getRankItems } from '@/server/queries';
-import { auth } from '@clerk/nextjs/server';
+import { currentUser } from '@clerk/nextjs/server';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react'
 
 export default async function RankingDetail({ params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
+  const user = await currentUser();
+  const mongoUser = await fetchUser(user?.externalId ?? '');
   const rankingId = (await params).id;
   const ranking = (await fetchRankingById(Number(rankingId)))[0];
   const rankItems = await getRankItems(Number(rankingId));
@@ -27,14 +29,14 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
         <div className='w-full'>
           <RankItems
             rankItems={rankItems}
-            userId={userId}
+            mongoUser={mongoUser}
             rankingId={rankingId}
             initialVotes={initialVotes}
           />
-          {userId && (userId === ranking.userId) && <Link href={`/ranking/${rankingId}/edit-ranking`}>
+          {mongoUser?.userId && (mongoUser.userId === ranking.userId) && <Link href={`/ranking/${rankingId}/edit-ranking`}>
             <Button className='mt-4'>Edit Ranking</Button>
           </Link>}
-          {userId && ranking.collaborative && <Link href={`/ranking/${rankingId}/edit-ranking`}>
+          {mongoUser?.userId && ranking.collaborative && <Link href={`/ranking/${rankingId}/edit-ranking`}>
             <Button className='mt-4'>Add Rank Item</Button>
           </Link>}
         </div>
@@ -45,7 +47,6 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
           key={rankItem.id}
           index={i + 1}
           pendingRankItem={rankItem}
-          userId={userId ?? ''}
           rankingUserId={ranking.userId}
         />)}
       </div>}
