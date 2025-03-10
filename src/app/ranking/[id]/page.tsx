@@ -33,12 +33,14 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
             rankingId={rankingId}
             initialVotes={initialVotes}
           />
-          {mongoUser?.userId && (mongoUser.userId === ranking.userId) && <Link href={`/ranking/${rankingId}/edit-ranking`}>
-            <Button className='mt-4'>Edit Ranking</Button>
-          </Link>}
-          {mongoUser?.userId && ranking.collaborative && <Link href={`/ranking/${rankingId}/edit-ranking`}>
-            <Button className='mt-4'>Add Rank Item</Button>
-          </Link>}
+          <div className='flex gap-3'>
+            {mongoUser?.userId && (mongoUser.userId === ranking.userId) && <Link href={`/ranking/${rankingId}/edit-ranking`}>
+              <Button className='mt-4'>Edit Ranking</Button>
+            </Link>}
+            {mongoUser?.userId && ranking.collaborative && <Link href={`/ranking/${rankingId}/edit-ranking`}>
+              <Button className='mt-4'>Add Rank Item</Button>
+            </Link>}
+          </div>
         </div>
       </div>
       {ranking.collaborative && pendingRankItems.length > 0 && <div>
