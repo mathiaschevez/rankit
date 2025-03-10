@@ -7,6 +7,15 @@ export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
   const url = new URL(req.url);
 
+  // Avoid user creation if we are in development or using localhost
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isLocalhost = url.hostname.includes('localhost');
+  
+  if (isDevelopment || isLocalhost) {
+    console.log("Skipping user creation on development or localhost environment.");
+    return NextResponse.next();
+  }
+
   if (!userId && url.pathname.includes("/create")) {
     return NextResponse.redirect(new URL("/", req.url));
   }
@@ -19,6 +28,7 @@ export default clerkMiddleware(async (auth, req) => {
   if (!user.externalId) {
     console.log(`User ${userId} has no externalId, needs MongoDB creation.`);
   }
+
   const mongoUser = user.externalId ? await fetchUser(user.externalId) : undefined;
   if (mongoUser) return NextResponse.next();
 
@@ -31,7 +41,7 @@ export default clerkMiddleware(async (auth, req) => {
       await client.users.updateUser(userId, { externalId });
     }
   } catch (err) {
-    console.error(`🚨 Error creating user in MongoDB: ${err}`);
+    console.error(`Error creating user in MongoDB: ${err}`);
   }
 
   return NextResponse.next();
