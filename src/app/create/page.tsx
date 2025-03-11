@@ -90,13 +90,14 @@ export default function CreateRanking() {
   });
 
   async function onBeginUpload() {
-    if (uploadedImage !== null && user.user) {
+    const externalId = user.user?.externalId;
+    if (uploadedImage !== null && externalId) {
       startUpload([uploadedImage])
         .then((res) => {
           createRanking({
             title,
             collaborative,
-            userId: user.user.id,
+            userId: externalId,
             coverImageUrl: res?.[0].url ?? '',
             coverImageFileKey: res?.[0].key ?? '',
           }).then((res) => {
