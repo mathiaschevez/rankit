@@ -16,7 +16,7 @@ export async function createRanking(data: InsertRanking) {
     .returning({ insertedId: rankings.id });
 }
 
-export async function updateRanking(updates: { collaborative: boolean, title: string }) {
+export async function updateRanking(updates: { collaborative: boolean, privateMode: boolean, title: string }) {
   return await db.update(rankings).set(updates);
 }
 

@@ -10,6 +10,7 @@ export const rankings = createTable('rankings', {
   coverImageUrl: varchar("coverImageUrl", { length: 1024 }).notNull(),
   coverImageFileKey: varchar("imageKey", { length: 1024 }).notNull(),
   collaborative: boolean("collaborative").notNull().default(false),
+  privateMode: boolean("privateMode").notNull().default(false),
   createdAt: timestamp("createdAt", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),

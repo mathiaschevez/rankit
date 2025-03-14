@@ -43,6 +43,7 @@ export default function CreateRanking() {
   const [title, setTitle] = useState('');
   const [uploadedImage, setUploadedImage] = useState<null | File>(null);
   const [collaborative, setCollaborative] = useState(false);
+  const [privateMode, setPrivateMode] = useState(false);
 
   useEffect(function WarnOnReload() {
     const handleBeforeUnload = (event: Event) => {
@@ -97,6 +98,7 @@ export default function CreateRanking() {
           createRanking({
             title,
             collaborative,
+            privateMode,
             userId: externalId,
             coverImageUrl: res?.[0].url ?? '',
             coverImageFileKey: res?.[0].key ?? '',
@@ -143,11 +145,19 @@ export default function CreateRanking() {
           />
           <div className="flex space-x-2 items-center">
             <Switch
-              id="collaboartive-mode"
+              id="collaboartive-switch"
               onCheckedChange={setCollaborative}
               checked={collaborative}
             />
-            <Label htmlFor="collaborative-mode">Collaborative Mode</Label>
+            <Label htmlFor="collaborative-switch">Collaborative Mode</Label>
+          </div>
+          <div className="flex space-x-2 items-center">
+            <Switch
+              id="private-switch"
+              onCheckedChange={setPrivateMode}
+              checked={privateMode}
+            />
+            <Label htmlFor="private-switch">Private</Label>
           </div>
         </div>
       </div>

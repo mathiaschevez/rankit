@@ -47,6 +47,7 @@ export default function EditRankingForm({ currentRankItems, ranking, userId }: {
   const [name, setName] = useState('');
   const [image, setImage] = useState<undefined | File>(undefined);
   const [collaborativeMode, setCollaborativeMode] = useState(ranking.collaborative);
+  const [privateMode, setPrivateMode] = useState(ranking.privateMode);
 
   const [imagesToUpload, setImagesToUpload] = useState<File[]>([]);
   const [newRankItems, setNewRankItems] = useState<NewRankItem[]>([]);
@@ -137,8 +138,8 @@ export default function EditRankingForm({ currentRankItems, ranking, userId }: {
       });
     }
     
-    if (ranking.collaborative !== collaborativeMode || ranking.title !== title) {
-      updateRanking({ collaborative: collaborativeMode, title }).then(() => router.refresh());
+    if (ranking.collaborative !== collaborativeMode || ranking.privateMode !== privateMode || ranking.title !== title) {
+      updateRanking({ collaborative: collaborativeMode, privateMode: privateMode, title }).then(() => router.refresh());
     }
   }
 
@@ -219,18 +220,28 @@ export default function EditRankingForm({ currentRankItems, ranking, userId }: {
         </div>
       </div>
       <div className='flex'>
-        {userId === ranking.userId && <div className='flex gap-2 items-center'>
-          <Switch
-            id="collaboartive-mode"
-            onCheckedChange={setCollaborativeMode}
-            checked={collaborativeMode}
-          />
-          <Label htmlFor="collaborative-mode">Collaborative Mode</Label>
+        {<div className='flex flex-col gap-4'>
+          <div className='flex gap-2 items-center'>
+            <Label htmlFor="collaborative-mode">Collaborative Mode</Label>
+            <Switch
+              id="collaboartive-mode"
+              onCheckedChange={setCollaborativeMode}
+              checked={collaborativeMode}
+            />
+          </div>
+          <div className='flex gap-2 items-center'>
+            <Label htmlFor="private-mode">Private Mode</Label>
+            <Switch
+              id="private-mode"
+              onCheckedChange={setPrivateMode}
+              checked={privateMode}
+            />
+          </div>
         </div>}
         <div className='flex gap-2 ml-auto'>
           {<Button
             className=''
-            disabled={(collaborativeMode === ranking.collaborative && newRankItems.length === 0 && title === ranking.title) || title === ''}
+            disabled={(collaborativeMode === ranking.collaborative && privateMode === ranking.privateMode && newRankItems.length === 0 && title === ranking.title) || title === ''}
             onClick={handleConfirmUpdates}
           >Confirm {isCollaborator ? 'Update Request' : 'Updates'}</Button>}
           {userId === ranking.userId && <Button

@@ -15,6 +15,8 @@ export async function fetchUser(externalId: string): Promise<MongoUser | undefin
 }
 
 export async function createUser(user: User, externalId: string): Promise<boolean> {
+  const development = env.NEXT_PUBLIC_API_URL.includes('localhost');
+
   try {
     const { firstName, lastName, emailAddresses } = user;
     
@@ -26,6 +28,7 @@ export async function createUser(user: User, externalId: string): Promise<boolea
         lastName,
         userId: externalId,
         email: emailAddresses[0]?.emailAddress,
+        development
       }),
     });
 

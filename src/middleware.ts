@@ -7,16 +7,7 @@ export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
   const url = new URL(req.url);
 
-  // Avoid user creation if we are in development or using localhost
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  const isLocalhost = url.hostname.includes('localhost');
-  
-  if (isDevelopment || isLocalhost) {
-    console.log("Skipping user creation on development or localhost environment.");
-    return NextResponse.next();
-  }
-
-  if (!userId && url.pathname.includes("/create")) {
+  if (!userId && (url.pathname.includes("/create") || url.pathname.includes("/edit-ranking"))) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
