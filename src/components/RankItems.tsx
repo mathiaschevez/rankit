@@ -2,11 +2,11 @@
 
 import RankItem from "./RankItem";
 import { useEffect, useMemo } from "react";
-import { useSelector } from "@/app/redux/store";
-import socket from "@/app/socket";
+import { useSelector } from "@/redux/store";
+import socket from "@/socket";
 import { useDispatch } from "react-redux";
-import { addVote, initVotes, Vote } from "@/app/redux/votes";
-import { initUser, MongoUser } from "@/app/redux/user";
+import { addVote, initVotes, Vote } from "@/redux/votes";
+import { initUser, MongoUser } from "@/redux/user";
 
 type RankItem = {
   id: number;

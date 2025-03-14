@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Button } from "./ui/button";
 import { deletePendingRankItem, insertRankItems } from "@/server/queries";
 import { useRouter } from "next/navigation";
-import { useSelector } from "@/app/redux/store";
+import { useSelector } from "@/redux/store";
 
 export default function PendingRankItem({ pendingRankItem, index, rankingUserId }: { pendingRankItem: SelectPendingRankItem, index: number, rankingUserId: string }) {
   const router = useRouter();

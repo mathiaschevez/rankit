@@ -1,8 +1,8 @@
 'use client';
 
-import { useSelector } from '@/app/redux/store';
-import { Vote } from '@/app/redux/votes';
-import socket from '@/app/socket';
+import { useSelector } from '@/redux/store';
+import { Vote } from '@/redux/votes';
+import socket from '@/socket';
 import { SelectRankItem } from '@/server/db/schema'
 import Image from 'next/image'
 import React from 'react'

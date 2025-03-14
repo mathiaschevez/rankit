@@ -2,7 +2,7 @@
 
 import { env } from "@/env";
 import { User } from "@clerk/nextjs/server";
-import { MongoUser } from "../redux/user";
+import { MongoUser } from "../../redux/user";
 
 export async function fetchUser(externalId: string): Promise<MongoUser | undefined> {
   const user = await fetch(`${env.NEXT_PUBLIC_API_URL}/users`, {
