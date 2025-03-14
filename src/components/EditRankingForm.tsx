@@ -220,7 +220,7 @@ export default function EditRankingForm({ currentRankItems, ranking, userId }: {
         </div>
       </div>
       <div className='flex'>
-        {<div className='flex flex-col gap-4'>
+        {userId === ranking.userId && <div className='flex flex-col gap-4'>
           <div className='flex gap-2 items-center'>
             <Label htmlFor="collaborative-mode">Collaborative Mode</Label>
             <Switch
