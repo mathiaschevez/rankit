@@ -1,4 +1,4 @@
-import { InfinityLoader } from "@/components/Loaders";
+import { InfinityLoader } from "@/components/svgs/Loaders";
 
 
 export default function Loading() {

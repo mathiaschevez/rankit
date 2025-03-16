@@ -6,79 +6,27 @@ import { Input } from './ui/input';
 import Image from 'next/image';
 import { Button } from './ui/button';
 import { deleteRanking, deleteRankItem, insertPendingRankItem, insertRankItems, updateRanking } from '@/server/queries';
-import { useUploadThing } from '@/utils/uploadthings';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { BouncingLoader } from './Loaders';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-
-function UploadSVG() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
-    </svg>
-  );
-}
+import useUploader from '@/hooks/useUploader';
+import UploadSVG from './svgs/UploadSVG';
 
 type NewRankItem = { name: string, rankingId: number, fileName: string, imageUrl: string };
 
-type Input = Parameters<typeof useUploadThing>;
-
-const useUploadThingInputProps = (...args: Input) => {
-  const $ut = useUploadThing(...args);
-
-  return {
-    inputProps: {
-      multiple: false,
-      accept: "image/*",
-    },
-    startUpload: $ut.startUpload,
-    isUploading: $ut.isUploading,
-  };
-};
-
 export default function EditRankingForm({ currentRankItems, ranking, userId }: { currentRankItems: SelectRankItem[], ranking: SelectRanking, userId: string }) {
   const router = useRouter();
+  const { startUpload } = useUploader();
+
   const isCollaborator = userId !== ranking.userId;
 
   const [title, setTitle] = useState(ranking.title);
-
   const [name, setName] = useState('');
   const [image, setImage] = useState<undefined | File>(undefined);
   const [collaborativeMode, setCollaborativeMode] = useState(ranking.collaborative);
   const [privateMode, setPrivateMode] = useState(ranking.privateMode);
-
   const [imagesToUpload, setImagesToUpload] = useState<File[]>([]);
   const [newRankItems, setNewRankItems] = useState<NewRankItem[]>([]);
-
-  const { startUpload } = useUploadThingInputProps('imageUploader', {
-    onUploadBegin() {
-      toast(
-        <div className="flex gap-4 items-center dark:text-white w-full">
-          <div className="w-[33px]"><BouncingLoader /></div>
-          <span className=" w-full">Uploading...</span>
-        </div>,
-        {
-          duration: 100000,
-          id: "upload-begin",
-          className: "dark:bg-gray-800",
-        }
-      )
-    },
-    onClientUploadComplete() {
-      toast.dismiss('upload-begin');
-      toast(
-        <span className="dark:text-white">Upload Complete</span>,
-        {
-          id: "upload-complete",
-          className: "dark:bg-gray-800"
-        }
-      );
-
-      router.refresh();
-    }
-  });
 
   useEffect(function WarnOnReload() {
     const handleBeforeUnload = (event: Event) => {
