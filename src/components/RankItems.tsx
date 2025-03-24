@@ -3,10 +3,10 @@
 import RankItem from "./RankItem";
 import { useEffect, useMemo } from "react";
 import { useSelector } from "@/redux/store";
-import socket from "@/socket";
 import { useDispatch } from "react-redux";
 import { addVote, initVotes, Vote } from "@/redux/votes";
 import { initUser, MongoUser } from "@/redux/user";
+import useSocket from "@/hooks/useSocket";
 
 type RankItem = {
   id: number;
@@ -23,6 +23,7 @@ type RankItem = {
 export default function RankItems({ initialVotes, rankItems, mongoUser, rankingId }: { initialVotes: Vote[], rankItems: RankItem[], mongoUser: MongoUser | undefined, rankingId: string }) {
   const dispatch = useDispatch();
   const votes = useSelector(state => state.votes.votes);
+  const { socket } = useSocket();
 
   useEffect(() => {
     dispatch(initVotes(initialVotes));
@@ -36,7 +37,7 @@ export default function RankItems({ initialVotes, rankItems, mongoUser, rankingI
       socket.off('vote', handleVote);
       socket.emit('stopListeningForVotes', rankingId);
     };
-  }, [dispatch, initialVotes, rankingId, mongoUser]);
+  }, [socket, dispatch, initialVotes, rankingId, mongoUser]);
 
   const rankItemsSortedByScore = useMemo(() => {
     const filteredVotes = votes.filter(v => v.rankingId.toString() === rankingId);

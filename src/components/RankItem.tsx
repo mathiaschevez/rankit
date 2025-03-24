@@ -2,12 +2,12 @@
 
 import { useSelector } from '@/redux/store';
 import { Vote } from '@/redux/votes';
-import socket from '@/socket';
 import { SelectRankItem } from '@/server/db/schema'
 import Image from 'next/image'
 import React from 'react'
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa'
 import { v4 as uuidv4 } from 'uuid';
+import useSocket from '@/hooks/useSocket';
 
 interface RankItemWithScore extends SelectRankItem {
   score: number,
@@ -15,6 +15,7 @@ interface RankItemWithScore extends SelectRankItem {
 }
 
 export default function RankItem({ rankItem, index }: { rankItem: RankItemWithScore, index: number }) {
+  const { socket } = useSocket()
   const user = useSelector(state => state.user.user)
   const currentVote = rankItem.rankItemVotes.find(v => v.userId === user?.userId);
 
