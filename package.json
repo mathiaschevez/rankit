@@ -18,7 +18,7 @@
     "@reduxjs/toolkit": "^2.6.0",
     "@t3-oss/env-nextjs": "^0.11.1",
     "@types/lodash": "^4.17.16",
-    "@uploadthing/react": "^7.1.5",
+    "@uploadthing/react": "^7.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.7",

@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createRanking } from "@/server/queries";
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -11,9 +10,10 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label";
 import useUploader from "@/hooks/useUploader";
 import UploadSVG from "@/components/svgs/UploadSVG";
+import { createRanking } from "../api/rankings";
 
 export default function CreateRanking() {
-  const user = useUser();
+  const { user } = useUser();
   const router = useRouter();
   const { startUpload } = useUploader();
 
@@ -40,20 +40,22 @@ export default function CreateRanking() {
   };
 
   async function onBeginUpload() {
-    const externalId = user.user?.externalId;
-    if (uploadedImage !== null && externalId) {
+    const userId = user?.externalId;
+    const userEmail = user?.emailAddresses[0].emailAddress;
+    if (uploadedImage !== null && userId && userEmail) {
       startUpload([uploadedImage])
         .then((res) => {
           createRanking({
             title,
             collaborative,
             privateMode,
-            userId: externalId,
+            userId,
+            userEmail,
             coverImageUrl: res?.[0].url ?? '',
-            coverImageFileKey: res?.[0].key ?? '',
-          }).then((res) => {
-            const insertedId = res[0].insertedId;
-            router.replace(`/ranking/${insertedId}`);
+            imageKey: res?.[0].key ?? '',
+          })
+          .then((res) => {
+            router.replace(`/ranking/${res.insertedId}`);
           });
         })
     }

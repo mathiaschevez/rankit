@@ -5,29 +5,16 @@ import { useEffect, useMemo } from "react";
 import { useSelector } from "@/redux/store";
 import { useDispatch } from "react-redux";
 import { addVote, initVotes, removeVote, Vote } from "@/redux/votes";
-import { initUser, MongoUser } from "@/redux/user";
 import useSocket from "@/hooks/useSocket";
+import { RankItemType } from "@/app/api/rankItems";
 
-type RankItem = {
-  id: number;
-  userId: string;
-  fileName: string;
-  rankingId: number;
-  imageUrl: string;
-  imageKey: string;
-  name: string;
-  createdAt: Date;
-  updatedAt: Date | null;
-}
-
-export default function RankItems({ initialVotes, rankItems, mongoUser, rankingId }: { initialVotes: Vote[], rankItems: RankItem[], mongoUser: MongoUser | undefined, rankingId: string }) {
+export default function RankItems({ initialVotes, rankItems, rankingId }: { initialVotes: Vote[], rankItems: RankItemType[], rankingId: string }) {
   const dispatch = useDispatch();
   const votes = useSelector(state => state.votes.votes);
   const { socket } = useSocket();
 
   useEffect(() => {
     dispatch(initVotes(initialVotes));
-    dispatch(initUser(mongoUser))
     socket.emit('listenForVotes', rankingId);
     
     const handleVote = (vote: Vote) => dispatch(addVote(vote));
@@ -39,13 +26,13 @@ export default function RankItems({ initialVotes, rankItems, mongoUser, rankingI
       socket.off('vote', handleVote);
       socket.emit('stopListeningForVotes', rankingId);
     };
-  }, [socket, dispatch, initialVotes, rankingId, mongoUser]);
+  }, [socket, dispatch, initialVotes, rankingId]);
 
   const rankItemsSortedByScore = useMemo(() => {
     const filteredVotes = votes.filter(v => v.rankingId.toString() === rankingId);
 
     return rankItems.map(ri => {
-      const rankItemVotes = filteredVotes.filter(v => v.rankItemId === ri.id);
+      const rankItemVotes = filteredVotes.filter(v => v.rankItemId === ri._id);
       const score = rankItemVotes.filter(v => v.type === 'upvote').length ?? 1 / rankItemVotes.filter(v => v.type === 'downvote').length ?? 1
       return { ...ri, rankItemVotes, score }
     }).sort((a, b) => {
@@ -58,7 +45,7 @@ export default function RankItems({ initialVotes, rankItems, mongoUser, rankingI
     <div className='w-full'>
       <div className='flex flex-col w-full'>
         {rankItemsSortedByScore.map((rankItem, i) => <RankItem
-          key={rankItem.id}
+          key={rankItem._id}
           rankItem={rankItem}
           index={i + 1}
         />)}

@@ -5,8 +5,9 @@ import { isEqual } from 'lodash'
 export type Vote = {
   voteId: string,
   userId: string,
-  rankingId: number,
-  rankItemId: number,
+  userEmail: string,
+  rankingId: string,
+  rankItemId: string,
   type: 'upvote' | 'downvote',
 }
 

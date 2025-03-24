@@ -1,9 +1,10 @@
-import { fetchUser } from '@/app/api/users';
+import { fetchRankingById } from '@/app/api/rankings';
+import { fetchRankItems } from '@/app/api/rankItems';
 import { fetchVotes } from '@/app/api/votes';
-import PendingRankItem from '@/components/PendingRankItem';
+// import PendingRankItem from '@/components/PendingRankItem';
 import RankItems from '@/components/RankItems';
 import { Button } from '@/components/ui/button';
-import { fetchRankingById, getPendingRankItems, getRankItems } from '@/server/queries';
+// import { getPendingRankItems } from '@/server/queries';
 import { currentUser } from '@clerk/nextjs/server';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -11,11 +12,10 @@ import React from 'react'
 
 export default async function RankingDetail({ params }: { params: Promise<{ id: string }> }) {
   const user = await currentUser();
-  const mongoUser = await fetchUser(user?.externalId ?? '');
   const rankingId = (await params).id;
-  const ranking = (await fetchRankingById(Number(rankingId)))[0];
-  const rankItems = await getRankItems(Number(rankingId));
-  const pendingRankItems = await getPendingRankItems(Number(rankingId));
+  const ranking = await fetchRankingById(rankingId);
+  const rankItems = await fetchRankItems(rankingId);
+  // const pendingRankItems = await getPendingRankItems(Number(rankingId));
   const initialVotes = await fetchVotes(rankingId);
 
   return (
@@ -29,21 +29,20 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
         <div className='w-full'>
           <RankItems
             rankItems={rankItems}
-            mongoUser={mongoUser}
             rankingId={rankingId}
             initialVotes={initialVotes}
           />
           <div className='flex gap-3'>
-            {mongoUser?.userId && (mongoUser.userId === ranking.userId) && <Link href={`/ranking/${rankingId}/edit-ranking`}>
+            {(user?.emailAddresses[0].emailAddress === ranking.userEmail) && <Link href={`/ranking/${rankingId}/edit-ranking`}>
               <Button className='mt-4'>Edit Ranking</Button>
             </Link>}
-            {mongoUser?.userId && ranking.collaborative && <Link href={`/ranking/${rankingId}/edit-ranking`}>
+            {user?.id && ranking.collaborative && <Link href={`/ranking/${rankingId}/edit-ranking`}>
               <Button className='mt-4'>Add Rank Item</Button>
             </Link>}
           </div>
         </div>
       </div>
-      {ranking.collaborative && pendingRankItems.length > 0 && <div>
+      {/* {ranking.collaborative && pendingRankItems.length > 0 && <div>
         <div>Pending Rank Items</div>
         {pendingRankItems.map((rankItem, i) => <PendingRankItem
           key={rankItem.id}
@@ -51,7 +50,7 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
           pendingRankItem={rankItem}
           rankingUserId={ranking.userId}
         />)}
-      </div>}
+      </div>} */}
     </div>
   )
 }

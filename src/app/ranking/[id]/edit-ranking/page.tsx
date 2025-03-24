@@ -1,13 +1,14 @@
+import { fetchRankingById } from '@/app/api/rankings';
+import { fetchRankItems } from '@/app/api/rankItems';
 import EditRankingForm from '@/components/EditRankingForm';
-import { fetchRankingById, getRankItems } from '@/server/queries';
 import { currentUser } from '@clerk/nextjs/server';
 import React from 'react'
 
 export default async function AddRankItem({ params }: { params: Promise<{id: string}> }) {
   const user = await currentUser();
   const rankingId = (await params).id;
-  const ranking = (await fetchRankingById(Number(rankingId)))?.[0]
-  const currentRankItems = await getRankItems(Number(rankingId));
+  const ranking = await fetchRankingById(rankingId)
+  const currentRankItems = await fetchRankItems(rankingId);
 
   return (
     <div>
@@ -15,6 +16,7 @@ export default async function AddRankItem({ params }: { params: Promise<{id: str
         currentRankItems={currentRankItems}
         ranking={ranking}
         userId={user?.externalId ?? ''}
+        userEmail={user?.emailAddresses[0].emailAddress ?? ''}
       />
     </div>
   )

@@ -1,23 +1,23 @@
 'use client';
 
-import { useSelector } from '@/redux/store';
 import { Vote } from '@/redux/votes';
-import { SelectRankItem } from '@/server/db/schema'
 import Image from 'next/image'
 import React, { useMemo } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import useSocket from '@/hooks/useSocket';
 import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
+import { RankItemType } from '@/app/api/rankItems';
+import { useUser } from '@clerk/nextjs';
 
-interface RankItemWithScore extends SelectRankItem {
+interface RankItemWithScore extends RankItemType {
   score: number,
   rankItemVotes: Vote[]
 }
 
 export default function RankItem({ rankItem, index }: { rankItem: RankItemWithScore, index: number }) {
   const { socket } = useSocket()
-  const user = useSelector(state => state.user.user);
-  const currentVote = rankItem.rankItemVotes.find(v => v.userId === user?.userId);
+  const { user } = useUser();
+  const currentVote = rankItem.rankItemVotes.find(v => v.userId === user?.id);
 
   const voteColor = useMemo(() => {
     if (!currentVote) return { background: 'hover:bg-slate-900', upvote: 'hover:bg-green-700', downvote: 'hover:bg-orange-700' };
@@ -27,7 +27,7 @@ export default function RankItem({ rankItem, index }: { rankItem: RankItemWithSc
   }, [currentVote]);
 
   function handleVote(type: 'upvote' | 'downvote') {
-    if (!user?.userId) return;
+    if (!user?.id) return;
     if (currentVote) {
       if (type === currentVote.type) {
         socket.emit('unvote', { ...currentVote });
@@ -37,8 +37,9 @@ export default function RankItem({ rankItem, index }: { rankItem: RankItemWithSc
     else {
       socket.emit('vote', {
         voteId: uuidv4(),
-        userId: user?.userId,
-        rankItemId: rankItem.id,
+        userId: user?.id,
+        userEmail: user.emailAddresses[0].emailAddress ?? '',
+        rankItemId: rankItem._id,
         rankingId: rankItem.rankingId,
         type,
       });

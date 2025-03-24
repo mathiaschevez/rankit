@@ -11,6 +11,7 @@ const utapi = new UTApi();
 // RANKINGS
 
 export async function createRanking(data: InsertRanking) {
+  //done
   return await db.insert(rankings)
     .values(data)
     .returning({ insertedId: rankings.id });
@@ -24,6 +25,9 @@ export async function deleteRanking(idToDelete: number) {
   const rankItemList = await db.select().from(rankItems).where(eq(rankItems.rankingId, idToDelete));
   const imagesToDelete = rankItemList.map(item => item.imageKey);
 
+  //remove rank items w ranking id
+  //remove votes w ranking id
+
   const coverImageKeysToDelete = await db.delete(rankings)
     .where(eq(rankings.id, idToDelete))
     .returning({ coverImageKey: rankings.coverImageFileKey })
@@ -32,10 +36,12 @@ export async function deleteRanking(idToDelete: number) {
 }
 
 export async function getRankings(): Promise<SelectRanking[]> {
+  //done
   return db.selectDistinct().from(rankings);
 }
 
 export async function fetchRankingById(rankingId: number) {
+  //done
   return await db.select().from(rankings).where(eq(rankings.id, rankingId));
 }
 
@@ -59,6 +65,8 @@ export async function deleteRankItem(rankItemId: number) {
   const imageKeyToDelete = await db.delete(rankItems)
     .where(eq(rankItems.id, rankItemId))
     .returning({ imageKey: rankItems.imageKey });
+
+  //delete votes w rank item id
 
   await utapi.deleteFiles(imageKeyToDelete[0].imageKey);
 }

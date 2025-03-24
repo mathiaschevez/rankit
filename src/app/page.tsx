@@ -1,12 +1,12 @@
 import { Card } from "@/components/ui/card";
-import { getRankings } from "@/server/queries";
 import Image from "next/image";
 import Link from "next/link";
+import { fetchRankings } from "./api/rankings";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const rankings = await getRankings();
+  const rankings = await fetchRankings();
 
   return (
     <div className="p-4">
@@ -14,8 +14,8 @@ export default async function Home() {
       <div className="flex flex-wrap items-center justify-center md:justify-normal w-full gap-4">
         {rankings.map((ranking) =>
           <Link
-            key={ranking.id}
-            href={`/ranking/${ranking.id}`}
+            key={ranking._id}
+            href={`/ranking/${ranking._id}`}
           >
             <Card className="flex flex-col justify-center border-2 w-[300px] h-[330px] p-4 gap-4 items-center">
               {ranking.coverImageUrl && <Image

@@ -1,20 +1,20 @@
 'use client';
 
-import { SelectRanking, SelectRankItem } from '@/server/db/schema'
 import React, { useEffect, useState } from 'react'
 import { Input } from './ui/input';
 import Image from 'next/image';
 import { Button } from './ui/button';
-import { deleteRanking, deleteRankItem, insertPendingRankItem, insertRankItems, updateRanking } from '@/server/queries';
 import { useRouter } from 'next/navigation';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import useUploader from '@/hooks/useUploader';
 import UploadSVG from './svgs/UploadSVG';
+import { deleteRankItem, insertRankItems, RankItemType } from '@/app/api/rankItems';
+import { deleteRanking, Ranking, updateRanking } from '@/app/api/rankings';
 
-type NewRankItem = { name: string, rankingId: number, fileName: string, imageUrl: string };
+type NewRankItem = { name: string, rankingId: string, fileName: string, imageUrl: string };
 
-export default function EditRankingForm({ currentRankItems, ranking, userId }: { currentRankItems: SelectRankItem[], ranking: SelectRanking, userId: string }) {
+export default function EditRankingForm({ currentRankItems, ranking, userId, userEmail }: { currentRankItems: RankItemType[], ranking: Ranking, userId: string, userEmail: string }) {
   const router = useRouter();
   const { startUpload } = useUploader();
 
@@ -61,7 +61,7 @@ export default function EditRankingForm({ currentRankItems, ranking, userId }: {
       setImagesToUpload([...imagesToUpload, image]);
       setNewRankItems([...newRankItems, {
         name,
-        rankingId: Number(ranking.id),
+        rankingId: ranking._id,
         fileName: image.name,
         imageUrl: URL.createObjectURL(image),
       }]);
@@ -71,27 +71,49 @@ export default function EditRankingForm({ currentRankItems, ranking, userId }: {
     setImage(undefined);
   }
 
-  function handleConfirmUpdates() {
-    if (newRankItems.length !== 0) {
-      const functionToUse = isCollaborator ? insertPendingRankItem : insertRankItems;
-      startUpload(imagesToUpload).then((res) => {
-        functionToUse(newRankItems.map(rankItem => ({
-          ...rankItem,
-          imageUrl: res?.find(file => file.name === rankItem.fileName)?.url ?? '',
-          imageKey: res?.find(file => file.name === rankItem.fileName)?.key ?? ''
-        })))
-      }).then(() => {
+  async function handleConfirmUpdates() {
+    try {
+      const shouldUpdateRankItems = newRankItems.length > 0;
+      const shouldUpdateRanking = ranking.collaborative !== collaborativeMode || ranking.privateMode !== privateMode || ranking.title !== title;
+  
+      if (shouldUpdateRankItems) {
+        const uploadResults = await startUpload(imagesToUpload);
+  
+        const updatedRankItems = newRankItems.map((rankItem) => {
+          const uploadedFile = uploadResults?.find(
+            (file) => file.name === rankItem.fileName
+          );
+  
+          return {
+            ...rankItem,
+            userId,
+            userEmail,
+            imageUrl: uploadedFile?.url || "",
+            imageKey: uploadedFile?.key || "",
+          };
+        });
+  
+        await insertRankItems(updatedRankItems);
         setNewRankItems([]);
-        if (ranking.collaborative === collaborativeMode) router.refresh();
-      });
-    }
-    
-    if (ranking.collaborative !== collaborativeMode || ranking.privateMode !== privateMode || ranking.title !== title) {
-      updateRanking({ collaborative: collaborativeMode, privateMode: privateMode, title }).then(() => router.refresh());
+      }
+  
+      if (shouldUpdateRanking) {
+        await updateRanking(ranking._id, {
+          collaborative: collaborativeMode,
+          privateMode,
+          title,
+        });
+      }
+  
+      if (shouldUpdateRankItems || shouldUpdateRanking) {
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Failed to update ranking:", error);
     }
   }
 
-  function handleDeleteRankItem(rankItemId: number) {
+  function handleDeleteRankItem(rankItemId: string) {
     deleteRankItem(rankItemId).then(() => router.refresh());
   }
 
@@ -111,7 +133,7 @@ export default function EditRankingForm({ currentRankItems, ranking, userId }: {
             <div className='text-xl'>{rankItem.name}</div>
             {userId === ranking.userId && <Button
               className='ml-auto'
-              onClick={() => handleDeleteRankItem(rankItem.id)}
+              onClick={() => handleDeleteRankItem(rankItem._id)}
             >Delete</Button>}
           </div>
         ))}
@@ -194,7 +216,7 @@ export default function EditRankingForm({ currentRankItems, ranking, userId }: {
           >Confirm {isCollaborator ? 'Update Request' : 'Updates'}</Button>}
           {userId === ranking.userId && <Button
             onClick={() => {
-              deleteRanking(Number(ranking.id))
+              deleteRanking(ranking._id)
                 .then(() => router.replace('/'));
             }}
           >Delete</Button>}
