@@ -34,11 +34,15 @@ export const votesSlice = createSlice({
         state.votes = [...filteredVotes, action.payload];
       } else {
         state.votes.push(action.payload);
-      } 
+      }
+    },
+    removeVote: (state, action: PayloadAction<Vote>) => {
+      const newVotes = state.votes.filter(v => v.voteId !== action.payload.voteId);
+      state.votes = newVotes;
     }
   },
 })
 
-export const { initVotes, addVote } = votesSlice.actions
+export const { initVotes, addVote, removeVote } = votesSlice.actions
 
 export default votesSlice.reducer

@@ -4,7 +4,7 @@ import RankItem from "./RankItem";
 import { useEffect, useMemo } from "react";
 import { useSelector } from "@/redux/store";
 import { useDispatch } from "react-redux";
-import { addVote, initVotes, Vote } from "@/redux/votes";
+import { addVote, initVotes, removeVote, Vote } from "@/redux/votes";
 import { initUser, MongoUser } from "@/redux/user";
 import useSocket from "@/hooks/useSocket";
 
@@ -31,7 +31,9 @@ export default function RankItems({ initialVotes, rankItems, mongoUser, rankingI
     socket.emit('listenForVotes', rankingId);
     
     const handleVote = (vote: Vote) => dispatch(addVote(vote));
+    const handleUnvote = (vote: Vote) => dispatch(removeVote(vote));
     socket.on('vote', handleVote);
+    socket.on('unvote', handleUnvote);
   
     return () => {
       socket.off('vote', handleVote);
