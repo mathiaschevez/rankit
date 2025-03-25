@@ -17,12 +17,13 @@ export default async function Home() {
             key={ranking._id}
             href={`/ranking/${ranking._id}`}
           >
-            <Card className="flex flex-col justify-center border-2 w-[300px] h-[330px] p-4 gap-4 items-center">
+            <Card className="flex flex-col border-2 w-[300px] h-[330px] p-4 gap-4 items-center justify-between">
               {ranking.coverImageUrl && <Image
-                alt='coverImg'
+                alt={ranking.title}
+                className="rounded-md h-[200px] w-[250px]"
                 src={ranking.coverImageUrl}
                 width={250}
-                height={250}
+                height={200}
               />}
               <div className="w-full">
                 <div className="font-bold text-xl">{ranking.title}</div>
