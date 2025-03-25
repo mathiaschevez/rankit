@@ -3,6 +3,9 @@ import { currentUser } from "@clerk/nextjs/server";
 import { fetchUser } from "../api/users";
 import { fetchUserRankings } from "../api/rankings";
 import { SignOutButton } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import Link from "next/link";
 
 export default async function ProfilePage() {
   const user = await currentUser();
@@ -12,7 +15,7 @@ export default async function ProfilePage() {
   const userRankings = await fetchUserRankings(user?.externalId ?? '');
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-8 p-4">
       <div className="flex gap-4">
         <Avatar className="w-32 h-32">
           <AvatarImage src={userImage} />
@@ -24,9 +27,25 @@ export default async function ProfilePage() {
           <SignOutButton />
         </div>
       </div>
+      <div className="font-bold text-3xl">Rankings</div>
       <div>
         {userRankings.map(ranking => (
-          <div key={ranking._id}>{ranking.title}</div>
+          <div key={ranking._id} className="flex justify-between">
+            <div className="flex flex-col justify-around">
+              {ranking.collaborative && <i className="text-blue-500">Collaborative</i>}
+              <div className="text-xl font-bold">{ranking.title}</div>
+              <Link href={`/ranking/${ranking._id}`}>
+                <Button className='bg-slate-800 hover:bg-slate-700 text-white'>View List</Button>
+              </Link>
+            </div>
+            <Image
+              className="rounded-lg"
+              src={ranking.coverImageUrl}
+              width={250}
+              height={250}
+              alt={ranking.title}
+            />
+          </div>
         ))}
       </div>
     </div>
