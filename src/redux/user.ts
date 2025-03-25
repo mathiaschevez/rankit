@@ -6,6 +6,7 @@ export type MongoUser = {
   lastName: string,
   userId: string,
   email: string,
+  bio?: string,
 }
 
 export interface UserState {

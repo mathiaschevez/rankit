@@ -27,6 +27,21 @@ export async function fetchRankings(): Promise<Ranking[]> {
   return rankings;
 }
 
+export async function fetchUserRankings(userId: string): Promise<Ranking[]> {
+  try {
+    const rankings = await fetch(`${env.NEXT_PUBLIC_API_URL}/rankings/user`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+    }).then((res) => res.json());
+
+    return rankings;
+  } catch (error) {
+    console.error("Error deleting ranking:", error);
+    return [];
+  }
+}
+
 export async function fetchRankingById(rankingId: string): Promise<Ranking> {
   const ranking = await fetch(`${env.NEXT_PUBLIC_API_URL}/rankings/ranking`, {
     method: "POST",
