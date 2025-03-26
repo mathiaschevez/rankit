@@ -35,8 +35,8 @@ export default function CreateRanking() {
   }, []);
 
   const onImageImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    setUploadedImage(e.target.files[0]);
+    const coverImage = e.target.files?.[0];
+    if (coverImage) setUploadedImage(coverImage);
   };
 
   async function onBeginUpload() {
@@ -62,11 +62,11 @@ export default function CreateRanking() {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 md:px-20">
       <div className="font-bold text-3xl mb-4">Create</div>
       <div className="flex flex-col md:flex-row gap-4">
         <label
-          className="flex cursor-pointer relative min-h-80 min-w-80 max-h-80 max-w-80 border border-white overflow-hidden"
+          className={`${uploadedImage === null && 'border border-white'} flex cursor-pointer relative min-h-80 max-h-80 w-full overflow-hidden justify-center`}
           htmlFor="upload-button"
         >
           {uploadedImage !== null && <Image
@@ -112,11 +112,17 @@ export default function CreateRanking() {
           </div>
         </div>
       </div>
-      <Button
-        disabled={!uploadedImage}
-        onClick={onBeginUpload}
-        className="py-3 px-5 md:py-6 md:px-8 md:text-lg mt-4"
-      >Create</Button>
+      <div className="flex gap-4">
+        <Button
+          onClick={() => router.back()}
+          className="py-3 px-5 md:py-6 md:px-8 md:text-lg mt-4 hover:bg-slate-200"
+        >Cancel</Button>
+        <Button
+          disabled={!uploadedImage || !title}
+          onClick={onBeginUpload}
+          className="py-3 px-5 md:py-6 md:px-8 md:text-lg mt-4 bg-blue-800 hover:bg-blue-700 text-white"
+        >Create</Button>
+      </div>
     </div>
   )
 };

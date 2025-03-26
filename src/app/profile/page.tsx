@@ -32,7 +32,7 @@ export default async function ProfilePage() {
         {userRankings.map(ranking => (
           <div key={ranking._id} className="grid grid-rows-2 md:grid-rows-1 md:flex md:justify-between">
             <div className="h-24 md:h-auto md:flex-1 flex flex-col md:justify-around">
-              {<i className="text-blue-500">Collaborative</i>}
+              {ranking.collaborative && <i className="text-blue-500">Collaborative</i>}
               <div className="text-xl font-bold">{ranking.title}</div>
               <Link href={`/ranking/${ranking._id}`}>
                 <Button className='bg-slate-800 hover:bg-slate-700 text-white'>View List</Button>
