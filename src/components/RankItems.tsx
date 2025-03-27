@@ -42,14 +42,12 @@ export default function RankItems({ initialVotes, rankItems, rankingId }: { init
   }, [rankItems, votes, rankingId]);
 
   return (
-    <div className='w-full'>
-      <div className='flex flex-col w-full'>
-        {rankItemsSortedByScore.map((rankItem, i) => <RankItem
-          key={rankItem._id}
-          rankItem={rankItem}
-          index={i + 1}
-        />)}
-      </div>
+    <div className='space-y-4'>
+      {rankItemsSortedByScore.map((rankItem, i) => <RankItem
+        key={rankItem._id}
+        rankItem={rankItem}
+        index={i + 1}
+      />)}
     </div>
   );
 }

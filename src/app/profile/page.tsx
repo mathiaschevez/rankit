@@ -1,6 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { currentUser } from "@clerk/nextjs/server";
-import { fetchUser } from "../api/users";
 import { fetchUserRankings } from "../api/rankings";
 import { SignOutButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ export default async function ProfilePage() {
   const user = await currentUser();
   const userImage = user?.hasImage ? user.imageUrl : undefined;
   const fallbackInitials = user?.firstName?.charAt(0) ?? '' + user?.lastName?.charAt(0) ?? '';
-  const userBio = (await fetchUser(user?.externalId ?? ''))?.bio ?? undefined;
+  // const userBio = (await fetchUser(user?.externalId ?? ''))?.bio ?? undefined;
   const userRankings = await fetchUserRankings(user?.externalId ?? '');
 
   return (
@@ -22,7 +21,7 @@ export default async function ProfilePage() {
           <AvatarFallback>{fallbackInitials}</AvatarFallback>
         </Avatar>
         <h1 className="text-3xl font-bold">{user?.firstName}</h1>
-        {userBio && <p>{userBio}</p>}
+        {/* {userBio && <p>{userBio}</p>} */}
         <div className="md:ml-auto">
           <SignOutButton />
         </div>

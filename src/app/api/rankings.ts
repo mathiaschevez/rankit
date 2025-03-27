@@ -11,6 +11,7 @@ export type Ranking = {
   userId: string,
   userEmail: string,
   title: string,
+  description?: string,
   coverImageUrl: string,
   imageKey: string,
   collaborative: boolean,

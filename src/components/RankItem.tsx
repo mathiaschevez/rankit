@@ -47,10 +47,20 @@ export default function RankItem({ rankItem, index }: { rankItem: RankItemWithSc
   }
 
   return (
-    <div className='flex w-full h-20 items-center gap-4'>
-      <div>{index}</div>
-      <Image className='rounded-full h-12 w-12' alt="rankItemImage" src={rankItem.imageUrl} width={50} height={50} />
-      <div className='text-xl flex-1'>{rankItem.name}</div>
+    <div
+      key={rankItem._id}
+      className="flex items-center gap-4 rounded-lg border border-gray-800 bg-gray-900 p-4 transition-all hover:border-[#005CA3]/30"
+    >
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#005CA3]/10 text-lg font-bold text-[#4a9ede]">
+        {index}
+      </div>
+      <div className="hidden h-16 w-24 flex-shrink-0 overflow-hidden rounded-md bg-gray-800 sm:block">
+        <Image src={rankItem.imageUrl} alt={rankItem.name} className="h-full w-full object-cover" height={100} width={100} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="truncate font-medium">{rankItem.name}</h3>
+        <p className="text-sm text-gray-400">{rankItem.rankItemVotes.length} votes</p>
+      </div>
       <div className={`${voteColor?.background} flex ml-auto items-center rounded-full py-1 px-1 gap-3`}>
         <button
           className={`${voteColor.upvote} p-2 rounded-full font-bold text-xl items-center gap-2 flex`}
@@ -69,3 +79,38 @@ export default function RankItem({ rankItem, index }: { rankItem: RankItemWithSc
     </div>
   )
 }
+
+{/* <div className="space-y-4">
+        {rankItems.map((item) => (
+
+
+            <div className="flex flex-col items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "h-8 w-8 rounded-full text-gray-400 hover:bg-[#005CA3]/10 hover:text-[#4a9ede]",
+                  item.userVote === "up" && "bg-[#005CA3]/20 text-[#4a9ede]",
+                )}
+                onClick={() => handleVote(item.id, "up")}
+              >
+                <ChevronUp className="h-5 w-5" />
+                <span className="sr-only">Upvote</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "h-8 w-8 rounded-full text-gray-400 hover:bg-[#005CA3]/10 hover:text-[#4a9ede]",
+                  item.userVote === "down" && "bg-[#005CA3]/20 text-[#4a9ede]",
+                )}
+                onClick={() => handleVote(item.id, "down")}
+              >
+                <ChevronDown className="h-5 w-5" />
+                <span className="sr-only">Downvote</span>
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div> */}

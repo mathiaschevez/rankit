@@ -11,7 +11,7 @@ export default async function Navbar() {
   return (
     <header className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-4 py-3">
       <div className="mx-auto flex items-center justify-between">
-        <Link href='/'><span className="text-xl font-bold text-[#005CA3]">rankit</span></Link>
+        <Link href='/'><span className="text-xl font-bold text-[#005CA3]">rankit.cc</span></Link>
         <div className='flex self-end h-full items-center gap-6'>
           <SignedIn>
             <Link href='/create'>
