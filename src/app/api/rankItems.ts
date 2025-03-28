@@ -46,8 +46,36 @@ export async function insertRankItems(rankItems: Omit<RankItemType, "_id">[]) {
   }
 }
 
-export async function updateRankItem(rankItemId: string, updates: Omit<RankItemType, "_id" | "userId" | "userEmail" | "rankingId">) {
-  console.log(rankItemId, updates)
+export async function updateRankItem(
+  rankItemId: string,
+  updates: {
+    name: string
+    imageUrl: string,
+    imageKey: string,
+    fileName: string,
+  }
+) {
+  try {
+    const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/rankItems/update`, {
+        method: "POST",
+        headers: new Headers({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ rankItemId, updates }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Failed to update ranking: ${response.status} - ${errorText}`
+      );
+    }
+
+    const updatedRankItem = await response.json();
+    return updatedRankItem;
+  } catch (error) {
+    console.error("Error updating ranking:", error);
+    throw error;
+  }
 }
 
 export async function deleteRankItem(rankItemId: string) {

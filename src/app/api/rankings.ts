@@ -95,9 +95,7 @@ export async function updateRanking(
     return updatedRanking;
   } catch (error) {
     console.error("Error updating ranking:", error);
-    // Consider re-throwing the error or returning a default value/error object
-    // depending on your application's error handling strategy
-    throw error; // Re-throw the error to propagate it to the caller
+    throw error;
   }
 }
 
