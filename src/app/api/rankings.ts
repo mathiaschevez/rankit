@@ -63,14 +63,42 @@ export async function createRanking(ranking: Omit<Ranking, "_id">): Promise<{ me
   return result;
 }
 
-export async function updateRanking(rankingId: string, updates: { collaborative: boolean, privateMode: boolean, title: string }) {
-  const updatedRanking = await fetch(`${env.NEXT_PUBLIC_API_URL}/rankings/update`, {
-    method: "POST",
-    headers: new Headers({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify({ rankingId, updates })
-  }).then(res => res.json());
+export async function updateRanking(
+  rankingId: string,
+  updates: {
+    description: string;
+    collaborative: boolean;
+    privateMode: boolean;
+    title: string;
+    coverImageUrl: string;
+    imageKey: string;
+  }
+) {
+  try {
+    const response = await fetch(
+      `${env.NEXT_PUBLIC_API_URL}/rankings/update`,
+      {
+        method: "POST",
+        headers: new Headers({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ rankingId, updates }),
+      }
+    );
 
-  return updatedRanking;
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Failed to update ranking: ${response.status} - ${errorText}`
+      );
+    }
+
+    const updatedRanking = await response.json();
+    return updatedRanking;
+  } catch (error) {
+    console.error("Error updating ranking:", error);
+    // Consider re-throwing the error or returning a default value/error object
+    // depending on your application's error handling strategy
+    throw error; // Re-throw the error to propagate it to the caller
+  }
 }
 
 export async function deleteRanking(rankingId: string) {

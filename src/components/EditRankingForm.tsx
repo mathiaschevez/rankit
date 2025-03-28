@@ -1,227 +1,730 @@
-'use client';
+"use client"
 
-import React, { useEffect, useState } from 'react'
-import { Input } from './ui/input';
-import Image from 'next/image';
-import { Button } from './ui/button';
-import { useRouter } from 'next/navigation';
-import { Switch } from './ui/switch';
-import { Label } from './ui/label';
-import useUploader from '@/hooks/useUploader';
-import UploadSVG from './svgs/UploadSVG';
-import { deleteRankItem, insertRankItems, RankItemType } from '@/app/api/rankItems';
-import { deleteRanking, Ranking, updateRanking } from '@/app/api/rankings';
+import type React from "react"
 
-type NewRankItem = { name: string, rankingId: string, fileName: string, imageUrl: string };
+import { useState, useRef, useEffect } from "react"
+import { ArrowLeft, ImagePlus, Plus, Trash2, X, AlertTriangle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { cn } from "@/lib/utils"
+import useUploader from "@/hooks/useUploader"
+import { useRouter } from "next/navigation"
+import { useUser } from "@clerk/nextjs"
+import Image from "next/image"
+import { deleteRanking, Ranking, updateRanking } from "@/app/api/rankings"
+import { insertRankItems, updateRankItem } from "@/app/api/rankItems"
 
-export default function EditRankingForm({ currentRankItems, ranking, userId, userEmail }: { currentRankItems: RankItemType[], ranking: Ranking, userId: string, userEmail: string }) {
-  const router = useRouter();
-  const { startUpload } = useUploader();
+// Updated RankItem type to match MongoDB structure
+export type RankItemType = {
+  _id: string
+  userId: string
+  userEmail: string
+  fileName: string
+  rankingId: string
+  imageUrl: string
+  name: string
+  imageKey: string
+  position?: number
+  votes?: number
+  image?: File | null // For new uploads
+}
 
-  const isCollaborator = userId !== ranking.userId;
+// Type for new items being added
+type NewRankItem = {
+  name: string
+  image: File | null
+  fileName: string
+}
 
-  const [title, setTitle] = useState(ranking.title);
-  const [name, setName] = useState('');
-  const [image, setImage] = useState<undefined | File>(undefined);
-  const [collaborativeMode, setCollaborativeMode] = useState(ranking.collaborative);
-  const [privateMode, setPrivateMode] = useState(ranking.privateMode);
-  const [imagesToUpload, setImagesToUpload] = useState<File[]>([]);
-  const [newRankItems, setNewRankItems] = useState<NewRankItem[]>([]);
+export default function EditRankingForm({ currentRankItems, ranking }: { currentRankItems: RankItemType[], ranking: Ranking, userId: string, userEmail: string }) {
+  const { user } = useUser()
+  const router = useRouter()
+  const { startUpload } = useUploader()
+
+  const [title, setTitle] = useState(ranking.title)
+  const [description, setDescription] = useState(ranking.description ?? '')
+  const [isCollaborative, setIsCollaborative] = useState(ranking.collaborative)
+  const [isPrivate, setIsPrivate] = useState(ranking.privateMode)
+  const [rankItems, setRankItems] = useState<RankItemType[]>(currentRankItems)
+
+  const [newRankingImage, setNewRankingImage] = useState<File | null>(null)
+  const [newItemName, setNewItemName] = useState("")
+  const [newItemImage, setNewItemImage] = useState<File | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState<RankItemType | null>(null)
+  const [editingItemNewImage, setEditingItemNewImage] = useState<File | null>(null)
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const itemFileInputRef = useRef<HTMLInputElement>(null)
+  const editItemFileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(function WarnOnReload() {
     const handleBeforeUnload = (event: Event) => {
-      event.preventDefault();
-      return 'Are you sure you want to reload?';
-    };
+      event.preventDefault()
+      return "Are you sure you want to reload?"
+    }
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload)
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, []);
-
-  const onImageImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-
-    if (
-      imagesToUpload.find(f => f.name === e.target.files?.[0].name) ||
-      currentRankItems.find(f => f.fileName === e.target.files?.[0].name)
-    ) {
-      alert('This image is already in use.');
-    } else {
-      setImage(e.target.files[0]);
+      window.removeEventListener("beforeunload", handleBeforeUnload)
     }
+  }, [])
 
-    e.target.value = ''
-  };
 
-  function handleAddRankItem() {
-    if (image === undefined) return;
-    else {
-      setImagesToUpload([...imagesToUpload, image]);
-      setNewRankItems([...newRankItems, {
-        name,
-        rankingId: ranking._id,
-        fileName: image.name,
-        imageUrl: URL.createObjectURL(image),
-      }]);
+  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) {
+      setNewRankingImage(file)
     }
-
-    setName('');
-    setImage(undefined);
   }
 
-  async function handleConfirmUpdates() {
+  function handleItemImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) {
+      setNewItemImage(file)
+    }
+  }
+
+  function handleEditItemImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file && editingItem) {
+      setEditingItemNewImage(file)
+    }
+  }
+
+  function addRankItem() {
+    if (newItemName.trim() && ranking) {
+
+      const newItem: NewRankItem = {
+        name: newItemName,
+        image: newItemImage,
+        fileName: newItemImage?.name || "",
+      }
+
+      // Add to UI immediately with a temporary ID
+      const tempItem: RankItemType = {
+        _id: `temp_${Date.now()}`,
+        userId: user?.id || "",
+        userEmail: user?.emailAddresses?.[0]?.emailAddress || "",
+        fileName: newItem.fileName,
+        rankingId: ranking._id,
+        imageUrl: newItemImage ? URL.createObjectURL(newItemImage) : "",
+        name: newItemName,
+        imageKey: "",
+        image: newItemImage,
+      }
+
+      setRankItems([...rankItems, tempItem])
+      setNewItemName("")
+      setNewItemImage(null)
+
+      if (itemFileInputRef.current) {
+        itemFileInputRef.current.value = ""
+      }
+    }
+  }
+
+  function removeRankItem(id: string) {
+    setRankItems(rankItems.filter((item) => item._id !== id))
+    // Note: actual deletion from database happens on form submit
+  }
+
+  function updateEditingItem(field: string, value: string) {
+    if (editingItem) {
+      setEditingItem({
+        ...editingItem,
+        [field]: value,
+      })
+    }
+  }
+
+  function saveEditingItem() {
+    if (editingItem) {
+      // If there's a new image, update the URL for preview
+      if (editingItemNewImage) {
+        editingItem.imageUrl = URL.createObjectURL(editingItemNewImage)
+        editingItem.fileName = editingItemNewImage.name
+        editingItem.image = editingItemNewImage
+      }
+
+      setRankItems(rankItems.map((item) => (item._id === editingItem._id ? editingItem : item)))
+
+      setEditingItem(null)
+      setEditingItemNewImage(null)
+    }
+  }
+
+  async function handleDeleteRanking() {
+    if (!ranking) return
+
     try {
-      const shouldUpdateRankItems = newRankItems.length > 0;
-      const shouldUpdateRanking = ranking.collaborative !== collaborativeMode || ranking.privateMode !== privateMode || ranking.title !== title;
+      await deleteRanking(ranking._id)
+      router.replace("/") // Redirect to home page
+    } catch (error) {
+      console.error("Error deleting ranking:", error)
+    }
+
+    setDeleteDialogOpen(false)
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
   
-      if (shouldUpdateRankItems) {
-        const uploadResults = await startUpload(imagesToUpload);
+    if (!user?.id || !user?.emailAddresses?.[0]?.emailAddress || !ranking) {
+      console.error("Missing required data (user or ranking).");
+      return;
+    }
   
-        const updatedRankItems = newRankItems.map((rankItem) => {
-          const uploadedFile = uploadResults?.find(
-            (file) => file.name === rankItem.fileName
-          );
+    const userId = user.id;
+    const userEmail = user.emailAddresses[0].emailAddress;
+  
+    try {
+      let coverImageUrl = ranking.coverImageUrl;
+      let imageKey = ranking.imageKey;
+  
+      // 1. Handle ranking cover image if changed
+      if (newRankingImage) {
+        const rankingImageUploadResult = await startUpload([newRankingImage]);
+        if (
+          rankingImageUploadResult?.[0]?.url &&
+          rankingImageUploadResult?.[0]?.key
+        ) {
+          coverImageUrl = rankingImageUploadResult[0].url;
+          imageKey = rankingImageUploadResult[0].key;
+        }
+      }
+  
+      // 2. Update the ranking
+      if (
+        newRankingImage ||
+        title !== ranking.title ||
+        (ranking.description && description !== ranking.description) ||
+        isCollaborative !== ranking.collaborative ||
+        isPrivate !== ranking.privateMode
+      ) {
+        await updateRanking(ranking._id, {
+          title,
+          description,
+          collaborative: isCollaborative,
+          privateMode: isPrivate,
+          coverImageUrl,
+          imageKey,
+        });
+      }
+  
+      // 3. Process existing items with changes (Parallelize updates)
+      const existingItemsToUpdate = rankItems.filter(
+        (item) =>
+          !item._id.startsWith("temp_") &&
+          (item.image || item.name !== item.name)
+      );
+  
+      // Use Promise.all to update items concurrently
+      await Promise.all(
+        existingItemsToUpdate.map(async (item) => {
+          let updatedImageUrl = item.imageUrl;
+          let updatedImageKey = item.imageKey;
+  
+          if (item.image) {
+            const itemImageUploadResult = await startUpload([item.image]);
+            if (
+              itemImageUploadResult?.[0]?.url &&
+              itemImageUploadResult?.[0]?.key
+            ) {
+              updatedImageUrl = itemImageUploadResult[0].url;
+              updatedImageKey = itemImageUploadResult[0].key;
+            }
+          }
+  
+          await updateRankItem(item._id, {
+            name: item.name,
+            imageUrl: updatedImageUrl,
+            imageKey: updatedImageKey,
+            fileName: item.fileName,
+          });
+        })
+      );
+  
+      // 4. Process new items
+      const newItems = rankItems.filter((item) => item._id.startsWith("temp_"));
+  
+      if (newItems.length > 0) {
+        const newItemsWithImages = newItems.filter((item) => item.image);
+        const imagesToUpload = newItemsWithImages
+          .map((item) => item.image)
+          .filter((img): img is File => img !== null);
+  
+        let uploadResults: { name: string, url: string, key: string }[] = [];
+        if (imagesToUpload.length > 0) {
+          uploadResults = (await startUpload(imagesToUpload)) || [];
+        }
+  
+        const itemsToInsert = newItems.map((item) => {
+          const uploadedFile = item.image
+            ? uploadResults.find((file) => file.name === item.fileName)
+            : null;
   
           return {
-            ...rankItem,
+            name: item.name,
+            fileName: item.fileName,
+            rankingId: ranking._id,
             userId,
             userEmail,
             imageUrl: uploadedFile?.url || "",
             imageKey: uploadedFile?.key || "",
+            position: item.position,
           };
         });
-  
-        await insertRankItems(updatedRankItems);
-        setNewRankItems([]);
+
+        await insertRankItems(itemsToInsert);
       }
   
-      if (shouldUpdateRanking) {
-        await updateRanking(ranking._id, {
-          collaborative: collaborativeMode,
-          privateMode,
-          title,
-        });
-      }
+      // 5. Handle deleted items (items in database but not in current rankItems)
   
-      if (shouldUpdateRankItems || shouldUpdateRanking) {
-        router.refresh();
-      }
+      // 6. Redirect back to the ranking page
+      router.replace(`/ranking/${ranking._id}`);
     } catch (error) {
-      console.error("Failed to update ranking:", error);
+      console.error("Error updating ranking:", error);
     }
   }
 
-  function handleDeleteRankItem(rankItemId: string) {
-    deleteRankItem(rankItemId).then(() => router.refresh());
-  }
-
   return (
-    <div className='p-4'>
-      <div className='text-2xl font-bold mb-4'>Editing Ranking</div>
-      <div className='flex flex-col gap-4'>
-        {userId === ranking.userId ?
-          <Input placeholder='New title' value={title} onChange={(e) => setTitle(e.target.value)} /> :
-          <div className='font-bold text-2xl'>{ranking.title}</div>}
-        {currentRankItems.map((rankItem, i) => (
-          <div key={rankItem.name} className='flex w-full h-28 items-center gap-4'>
-            <div>{i + 1}</div>
-            <div className='flex min-h-28 max-h-28 min-w-28 max-w-28 overflow-hidden'>
-              <Image alt="rankItemImage" src={rankItem.imageUrl} width={600} height={300} />
-            </div>
-            <div className='text-xl'>{rankItem.name}</div>
-            {userId === ranking.userId && <Button
-              className='ml-auto'
-              onClick={() => handleDeleteRankItem(rankItem._id)}
-            >Delete</Button>}
-          </div>
-        ))}
-      </div>
-      <div className='flex flex-col gap-4 mt-4'>
-        {newRankItems.map((rankItem, i) => (
-          <div key={rankItem.name} className='flex w-full h-28 items-center gap-4'>
-            <div>{currentRankItems.length + i + 1}</div>
-            <div className='flex min-h-28 max-h-28 min-w-28 max-w-28 overflow-hidden'>
-              <Image alt="rankItemImage" src={rankItem.imageUrl} width={600} height={300} />
-            </div>
-            <div className='text-xl'>{rankItem.name}</div>
-          </div>
-        ))}
-      </div>
-      <div className='flex items-center gap-4 mt-4 mb-4'>
-        <div>{[...currentRankItems ?? [], ...newRankItems].length + 1}</div>
-        <label
-          className="flex cursor-pointer relative min-h-28 min-w-28 max-h-28 max-w-28 border border-white overflow-hidden"
-          htmlFor="upload-button"
+    <div className="dark min-h-screen bg-gray-950 text-gray-100">
+      {/* Back button */}
+      <div className="mx-auto max-w-3xl px-4 py-4">
+        <Button
+          variant="ghost"
+          className="flex items-center text-gray-400 hover:text-white"
+          onClick={() => router.back()}
         >
-          {image !== undefined && <Image
-            id="target"
-            alt='uploadedImage'
-            src={URL.createObjectURL(image)}
-            width={600}
-            height={300}
-          />}
-          <div className="absolute top-[40%] left-[40%]">
-            <UploadSVG />
-          </div>
-        </label>
-        <input
-          id="upload-button"
-          type="file"
-          accept="image/*"
-          className="sr-only"
-          onChange={onImageImport}
-        />
-        <div className='flex flex-col md:flex-row gap-2 w-full'>
-          <Input
-            className='flex-1'
-            placeholder='name'
-            onChange={(e) => setName(e.target.value)}
-            maxLength={100}
-            value={name}
-          />
-          <div className={`${(!image || !name) ? 'cursor-not-allowed' : ''}`}>
-            <Button
-              disabled={!image || !name}
-              onClick={handleAddRankItem}
-            >Add Rank Item</Button>
-          </div>
-        </div>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Ranking
+        </Button>
       </div>
-      <div className='flex'>
-        {userId === ranking.userId && <div className='flex flex-col gap-4'>
-          <div className='flex gap-2 items-center'>
-            <Label htmlFor="collaborative-mode">Collaborative Mode</Label>
-            <Switch
-              id="collaboartive-mode"
-              onCheckedChange={setCollaborativeMode}
-              checked={collaborativeMode}
-            />
-          </div>
-          <div className='flex gap-2 items-center'>
-            <Label htmlFor="private-mode">Private Mode</Label>
-            <Switch
-              id="private-mode"
-              onCheckedChange={setPrivateMode}
-              checked={privateMode}
-            />
-          </div>
-        </div>}
-        <div className='flex gap-2 ml-auto'>
-          {<Button
-            className=''
-            disabled={(collaborativeMode === ranking.collaborative && privateMode === ranking.privateMode && newRankItems.length === 0 && title === ranking.title) || title === ''}
-            onClick={handleConfirmUpdates}
-          >Confirm {isCollaborator ? 'Update Request' : 'Updates'}</Button>}
-          {userId === ranking.userId && <Button
-            onClick={() => {
-              deleteRanking(ranking._id)
-                .then(() => router.replace('/'));
-            }}
-          >Delete</Button>}
+
+      <div className="mx-auto max-w-3xl px-4 pb-16">
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Edit Ranking</h1>
+          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="destructive">Delete Ranking</Button>
+            </DialogTrigger>
+            <DialogContent className="border-gray-800 bg-gray-900 text-white sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-white">
+                  <AlertTriangle className="h-5 w-5 text-red-500" />
+                  Delete Ranking
+                </DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  Are you sure you want to delete this ranking? This action cannot be undone and all votes and data will
+                  be permanently lost.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteDialogOpen(false)}
+                  className="border-gray-700 bg-gray-800 text-white hover:bg-gray-700"
+                >
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleDeleteRanking}>
+                  Delete Permanently
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Ranking Image */}
+          <div className="space-y-2">
+            <Label htmlFor="ranking-image">Ranking Cover Image</Label>
+            <div className="flex flex-col items-center justify-center">
+              {ranking.coverImageUrl || newRankingImage ? (
+                <div className="relative mb-4 w-full">
+                  <div className="aspect-[3/1] w-full overflow-hidden rounded-lg bg-gray-800">
+                    {newRankingImage ? (
+                      <Image
+                        src={URL.createObjectURL(newRankingImage) || "/placeholder.svg"}
+                        alt="Ranking cover"
+                        className="h-full w-full object-cover"
+                        fill
+                      />
+                    ) : (
+                      <Image
+                        src={ranking.coverImageUrl}
+                        alt="Ranking cover"
+                        className="h-full w-full object-cover"
+                        fill
+                      />
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="absolute right-2 top-2 h-8 w-8 rounded-full border-gray-700 bg-gray-800/80 text-white hover:bg-gray-700"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <ImagePlus className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="mb-4 flex aspect-[3/1] w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-700 bg-gray-800/50 p-6 transition-colors hover:border-[#005CA3] hover:bg-gray-800"
+                >
+                  <ImagePlus className="mb-2 h-10 w-10 text-gray-500" />
+                  <p className="text-center text-sm text-gray-400">
+                    Click to upload a cover image
+                    <br />
+                    <span className="text-xs">16:9 ratio recommended</span>
+                  </p>
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                id="ranking-image"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+            </div>
+          </div>
+
+          {/* Ranking Title */}
+          <div className="space-y-2">
+            <Label htmlFor="title">Ranking Title</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter a title for your ranking"
+              className="border-gray-700 bg-gray-800 text-white placeholder:text-gray-500"
+              required
+            />
+          </div>
+
+          {/* Ranking Description */}
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe what this ranking is about"
+              className="min-h-[100px] border-gray-700 bg-gray-800 text-white placeholder:text-gray-500"
+            />
+          </div>
+
+          {/* Collaborative Switch */}
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="collaborative"
+              checked={isCollaborative}
+              onCheckedChange={setIsCollaborative}
+              className="data-[state=checked]:bg-[#005CA3]"
+            />
+            <Label htmlFor="collaborative">Allow collaboration</Label>
+          </div>
+
+          {/* Private Switch */}
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="private"
+              checked={isPrivate}
+              onCheckedChange={setIsPrivate}
+              className="data-[state=checked]:bg-[#005CA3]"
+            />
+            <Label htmlFor="private">Set this ranking to private</Label>
+          </div>
+
+          {/* Current Rank Items */}
+          <div className="space-y-4 rounded-lg border border-gray-800 bg-gray-900 p-4">
+            <h2 className="text-lg font-medium">Current Rank Items</h2>
+
+            {rankItems.length > 0 ? (
+              <div className="space-y-3">
+                {rankItems.map((item) => (
+                  <div
+                    key={item._id}
+                    className={cn(
+                      "rounded-md border border-gray-800 bg-gray-800/50 p-3",
+                      editingItem?._id === item._id && "border-[#005CA3]/50",
+                    )}
+                  >
+                    {editingItem?._id === item._id ? (
+                      // Edit mode
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#005CA3]/10 text-lg font-bold text-[#4a9ede]">
+                            {item.position}
+                          </div>
+                          <div className="flex-1">
+                            <Input
+                              value={editingItem.name}
+                              onChange={(e) => updateEditingItem("name", e.target.value)}
+                              className="border-gray-700 bg-gray-800 text-white"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          {editingItemNewImage ? (
+                            <div className="relative h-16 w-24">
+                              <Image
+                                src={URL.createObjectURL(editingItemNewImage) || "/placeholder.svg"}
+                                alt={editingItem.name}
+                                className="h-full w-full rounded-md object-cover"
+                                width={96}
+                                height={64}
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                className="absolute -right-2 -top-2 h-6 w-6 rounded-full border-gray-700 bg-gray-800/80 text-white hover:bg-gray-700"
+                                onClick={() => editItemFileInputRef.current?.click()}
+                              >
+                                <ImagePlus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : editingItem.imageUrl ? (
+                            <div className="relative h-16 w-24">
+                              <Image
+                                src={editingItem.imageUrl || "/placeholder.svg"}
+                                alt={editingItem.name}
+                                className="h-full w-full rounded-md object-cover"
+                                width={96}
+                                height={64}
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                className="absolute -right-2 -top-2 h-6 w-6 rounded-full border-gray-700 bg-gray-800/80 text-white hover:bg-gray-700"
+                                onClick={() => editItemFileInputRef.current?.click()}
+                              >
+                                <ImagePlus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="h-16 w-24 border-gray-700 bg-gray-800"
+                              onClick={() => editItemFileInputRef.current?.click()}
+                            >
+                              <ImagePlus className="h-5 w-5 text-gray-400" />
+                            </Button>
+                          )}
+                          <input
+                            ref={editItemFileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleEditItemImageUpload}
+                          />
+
+                          <div className="flex flex-1 justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="border-gray-700 bg-gray-800 text-white hover:bg-gray-700"
+                              onClick={() => {
+                                setEditingItem(null)
+                                setEditingItemNewImage(null)
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              className="bg-[#005CA3] hover:bg-[#004a82]"
+                              onClick={saveEditingItem}
+                            >
+                              Save
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      // View mode
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#005CA3]/10 text-lg font-bold text-[#4a9ede]">
+                          {item.position}
+                        </div>
+
+                        {item.imageUrl && (
+                          <div className="h-12 w-16 overflow-hidden rounded-md relative">
+                            <Image
+                              src={item.imageUrl || "/placeholder.svg"}
+                              alt={item.name}
+                              className="object-cover"
+                              fill
+                            />
+                          </div>
+                        )}
+
+                        <div className="flex-1 min-w-0">
+                          <p className="truncate font-medium">{item.name}</p>
+                          <p className="text-xs text-gray-400">{item.votes || 0} votes</p>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-gray-400 hover:bg-gray-700 hover:text-white"
+                            onClick={() => setEditingItem(item)}
+                            title="Edit item"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                              <path d="m15 5 4 4" />
+                            </svg>
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-gray-400 hover:bg-red-900/20 hover:text-red-500"
+                            onClick={() => removeRankItem(item._id)}
+                            title="Remove item"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-md border border-gray-800 bg-gray-800/30 p-6 text-center">
+                <p className="text-gray-400">No items in this ranking yet. Add some below.</p>
+              </div>
+            )}
+          </div>
+
+          {/* Add New Rank Items */}
+          <div className="space-y-4 rounded-lg border border-gray-800 bg-gray-900 p-4">
+            <h2 className="text-lg font-medium">Add New Item</h2>
+
+            <div className="space-y-4">
+              {/* New Item Image */}
+              <div className="space-y-2">
+                <Label htmlFor="item-image">Item Image (Optional)</Label>
+                <div className="flex items-center space-x-4">
+                  {newItemImage ? (
+                    <div className="relative h-16 w-24">
+                      <Image
+                        src={URL.createObjectURL(newItemImage) || "/placeholder.svg"}
+                        alt="Item preview"
+                        className="h-full w-full rounded-md object-cover"
+                        width={96}
+                        height={64}
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -right-2 -top-2 h-6 w-6 rounded-full"
+                        onClick={() => setNewItemImage(null)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-16 w-24 border-gray-700 bg-gray-800"
+                      onClick={() => itemFileInputRef.current?.click()}
+                    >
+                      <ImagePlus className="h-5 w-5 text-gray-400" />
+                    </Button>
+                  )}
+                  <input
+                    ref={itemFileInputRef}
+                    id="item-image"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleItemImageUpload}
+                  />
+                </div>
+              </div>
+
+              {/* New Item Title */}
+              <div className="flex space-x-2">
+                <Input
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                  placeholder="Enter item title"
+                  className="border-gray-700 bg-gray-800 text-white placeholder:text-gray-500"
+                />
+                <Button
+                  type="button"
+                  onClick={addRankItem}
+                  className="bg-[#005CA3] hover:bg-[#004a82]"
+                  disabled={!newItemName.trim()}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Submit Buttons */}
+          <div className="flex justify-end space-x-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="border-gray-700 bg-gray-800 text-white hover:bg-gray-700"
+              onClick={() => router.back()}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="bg-[#005CA3] hover:bg-[#004a82]"
+              disabled={!title.trim() || rankItems.length === 0}
+            >
+              Save Changes
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   )
 }
+

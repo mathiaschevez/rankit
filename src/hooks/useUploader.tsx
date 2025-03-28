@@ -1,6 +1,5 @@
 import { BouncingLoader } from "@/components/svgs/Loaders";
 import { useUploadThing } from "@/utils/uploadthings";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 type Input = Parameters<typeof useUploadThing>;
@@ -19,8 +18,6 @@ const useUploadThingInputProps = (...args: Input) => {
 };
 
 export default function useUploader() {
-  const router = useRouter();
-
   const { startUpload } = useUploadThingInputProps('imageUploader', {
     onUploadBegin() {
       toast(
@@ -44,8 +41,6 @@ export default function useUploader() {
           className: "dark:bg-gray-800"
         }
       );
-
-      router.refresh();
     }
   });
 

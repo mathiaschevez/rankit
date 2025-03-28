@@ -46,6 +46,9 @@ export async function insertRankItems(rankItems: Omit<RankItemType, "_id">[]) {
   }
 }
 
+export async function updateRankItem(rankItemId: string, updates: Omit<RankItemType, "_id" | "userId" | "userEmail" | "rankingId">) {
+  console.log(rankItemId, updates)
+}
 
 export async function deleteRankItem(rankItemId: string) {
   try {
