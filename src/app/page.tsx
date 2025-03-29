@@ -59,12 +59,12 @@ function CreateRankingButton({ user }: { user: User | null }) {
       </Link>
     ) : (
       <SignInButton>
-        <Link href={'/'} className="flex h-[220px] flex-col items-center justify-center rounded-lg border border-dashed border-gray-700 bg-gray-900/50 p-6 text-gray-400 transition-colors hover:border-[#005CA3] hover:text-[#4a9ede]">
+        <div className="flex h-[220px] flex-col items-center justify-center rounded-lg border border-dashed border-gray-700 bg-gray-900/50 p-6 text-gray-400 transition-colors hover:border-[#005CA3] hover:text-[#4a9ede]">
           <div className="mb-3 rounded-full bg-[#005CA3]/10 p-3">
             <Plus className="h-6 w-6 text-[#4a9ede]" />
           </div>
           <p className="font-medium">Create New Ranking</p>
-        </Link>
+        </div>
       </SignInButton>
     )}
   </>
