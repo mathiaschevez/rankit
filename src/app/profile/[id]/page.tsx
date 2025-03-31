@@ -1,24 +1,31 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { currentUser } from "@clerk/nextjs/server";
-import { fetchUserRankings } from "../api/rankings";
-import { SignOutButton } from "@clerk/nextjs";
+import { clerkClient, currentUser } from "@clerk/nextjs/server";
+import { fetchUserRankings } from "../../api/rankings";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calendar, Edit, ImagePlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { timeSince } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { fetchUser } from "@/app/api/users";
+import Link from "next/link";
+import { SignOutButton } from "@clerk/nextjs";
 
-export default async function ProfilePage() {
-  const user = await currentUser();
+export default async function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const userId = (await params).id;
+  const user = await (await clerkClient()).users.getUser(userId);
+  const isOwnProfile = (await currentUser())?.id === userId;
+
   const userImage = user?.hasImage ? user.imageUrl : '';
   const fallbackInitials = user?.firstName?.charAt(0) ?? '' + user?.lastName?.charAt(0) ?? '';
-  // const userBio = (await fetchUser(user?.externalId ?? ''))?.bio ?? undefined;
-  const userRankings = await fetchUserRankings(user?.externalId ?? '');
+
+  const userDetails = await fetchUser(userId);
+  const userRankings = await fetchUserRankings(userId);
 
   return (
     <div className="dark min-h-screen bg-gray-950 text-gray-100">
       {/* Back button */}
+      <SignOutButton />
       <div className="mx-auto max-w-7xl px-4 py-4">
         <Button variant="ghost" className="flex items-center text-gray-400 hover:text-white">
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -29,12 +36,16 @@ export default async function ProfilePage() {
       {/* Banner */}
       <div className="relative">
         <div className="h-48 w-full overflow-hidden bg-gray-800 sm:h-64 md:h-80">
-          <Image
-            src={userImage}
-            alt="Profile banner"
-            className="h-full w-full object-cover"
-            fill
-          />
+          {userImage ? (
+            <Image
+              src={userImage}
+              alt="Profile banner"
+              className="h-full w-full object-cover"
+              fill
+            />
+          ) : (
+            <ImagePlus className="h-5 w-5 text-gray-400" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-gray-950 to-transparent opacity-60"></div>
         </div>
       </div>
@@ -51,62 +62,48 @@ export default async function ProfilePage() {
               </AvatarFallback>
             </Avatar>
           </div>
-
-          {/* User Info and Stats */}
-          {/* <div className="ml-36 flex flex-col justify-between sm:ml-40 sm:flex-row sm:items-end">
+          <div className="ml-36 flex flex-col justify-between sm:ml-40 sm:flex-row sm:items-end">
             <div className="mb-4 sm:mb-0">
               <h1 className="text-2xl font-bold sm:text-3xl">{user?.fullName}</h1>
               <p className="text-gray-400">@{user.username}</p>
             </div>
             {isOwnProfile && (
-              <Button className="bg-[#005CA3] hover:bg-[#004a82]">
-                <Edit className="mr-2 h-4 w-4" />
-                Edit Profile
-              </Button>
+              <Link href={`/profile/${userId}/edit`}>
+                <Button className="bg-[#005CA3] hover:bg-[#004a82]">
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Profile
+                </Button>
+              </Link>
             )}
-          </div> */}
+          </div>
         </div>
-        {/* Bio and Additional Info */}
-        {/* <div className="mb-8 mt-6">
-          <p className="mb-4 text-gray-300">{user.bio}</p>
+        <div className="mb-8 mt-6">
+          <p className="mb-4 text-gray-300">{userDetails?.bio ?? ''}</p>
           <div className="flex flex-wrap gap-4 text-sm text-gray-400">
-            {user.location && (
-              <div className="flex items-center">
-                <MapPin className="mr-1 h-4 w-4" />
-                {user.location}
-              </div>
-            )}
             <div className="flex items-center">
               <Calendar className="mr-1 h-4 w-4" />
-              Joined {user.joinedDate}
+              Joined {new Date(user.createdAt).toLocaleDateString()}
             </div>
           </div>
-        </div> */}
+        </div>
         {/* Stats - Compact Version */}
-        {/* <div className="mb-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+        <div className="mb-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
           <div className="flex items-center">
-            <span className="mr-1 font-semibold text-white">{user.stats.rankings}</span>
+            <span className="mr-1 font-semibold text-white">{userRankings.length}</span>
             <span className="text-gray-400">Rankings</span>
           </div>
-          <div className="flex items-center">
-            <span className="mr-1 font-semibold text-white">{user.stats.contributions}</span>
+          {/* <div className="flex items-center">
+            <span className="mr-1 font-semibold text-white">{userDetails}</span>
             <span className="text-gray-400">Contributions</span>
-          </div>
+          </div> */}
           <div className="flex items-center">
-            <span className="mr-1 font-semibold text-white">{user.stats.followers}</span>
+            <span className="mr-1 font-semibold text-white">{userDetails?.followers ?? 0}</span>
             <span className="text-gray-400">Followers</span>
           </div>
           <div className="flex items-center">
-            <span className="mr-1 font-semibold text-white">{user.stats.following}</span>
+            <span className="mr-1 font-semibold text-white">{userDetails?.following ?? 0}</span>
             <span className="text-gray-400">Following</span>
           </div>
-        </div> */}
-        <div className="mb-6 flex justify-center">
-          <SignOutButton>
-            <Button className="border-gray-700 bg-gray-800 text-gray-200 hover:bg-gray-700">
-              Sign Out
-            </Button>
-          </SignOutButton>
         </div>
         {/* Rankings Tabs */}
         <Tabs defaultValue="created" className="mb-12">
@@ -121,11 +118,8 @@ export default async function ProfilePage() {
               Contributed Rankings
             </TabsTrigger>
           </TabsList>
-
-          {/* Created Rankings Tab */}
           <TabsContent value="created">
-            {/* <h2 className="mb-4 text-xl font-semibold">Rankings Created by {isOwnProfile ? "You" : user.name}</h2> */}
-
+            <h2 className="mb-4 text-xl font-semibold">Rankings Created by {isOwnProfile ? "You" : user.fullName}</h2>
             {userRankings.length > 0 ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {userRankings.map((ranking) => (
@@ -138,6 +132,7 @@ export default async function ProfilePage() {
                         src={ranking.coverImageUrl}
                         alt={ranking.title}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        fill
                       />
                     </div>
                     <div className="p-4">

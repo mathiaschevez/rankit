@@ -42,7 +42,7 @@ async function ProfileLink() {
   const fallbackInitials = user?.firstName?.charAt(0) ?? '' + user?.lastName?.charAt(0) ?? '';
 
   return (
-    <Link href='/profile' className=''>
+    <Link href={`/profile/${user?.id}`} className=''>
       <Avatar>
         <AvatarImage src={userImage} />
         <AvatarFallback>{fallbackInitials}</AvatarFallback>
@@ -50,11 +50,3 @@ async function ProfileLink() {
     </Link>
   )
 }
-
-{/* <UserButton
-  appearance={{
-    elements: {
-      userButtonAvatarBox: "w-9 h-9"
-    }
-  }}
-/> */}

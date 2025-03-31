@@ -45,6 +45,7 @@ export const config = {
 
     "/(api|trpc)(.*)", // Ensure middleware runs on API routes
     "/create/:path*", // Include `/create` routes for redirection
-    "/profile"
+    "/profile",
+    "/api/webhooks(.*)"
   ],
 };

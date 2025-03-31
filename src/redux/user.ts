@@ -2,11 +2,14 @@ import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 
 export type MongoUser = {
-  firstName: string,
-  lastName: string,
+  displayName: string,
   userId: string,
   email: string,
   bio?: string,
+  followers?: number,
+  following?: number,
+  location?: string,
+  userName?: string,
 }
 
 export interface UserState {
