@@ -41,8 +41,6 @@ export default function RankItems({ initialVotes, rankItems, rankingId }: { init
       })
   }, [rankItems, votes]);
 
-  console.log(rankItemsSortedByScore)
-
   return (
     <div className='space-y-4'>
       {rankItemsSortedByScore.map((rankItem, i) => <RankItem

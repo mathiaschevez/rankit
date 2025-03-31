@@ -19,8 +19,8 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
   const rankItems = await fetchRankItems(rankingId);
   const initialVotes = await fetchVotes(rankingId);
 
-  const creator = await (await clerkClient()).users.getUser(ranking.userId);
   const user = await currentUser();
+  const creator = (await getCreator(ranking.userId)) ?? user;
   const isCreator = user?.id === ranking.userId;
 
   return (
@@ -49,13 +49,13 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
           <div className="mt-4 flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8 border border-gray-700">
-                <AvatarImage src={creator.imageUrl} alt={creator.fullName ?? ''} />
+                <AvatarImage src={creator?.imageUrl} alt={creator?.fullName ?? ''} />
                 <AvatarFallback className="bg-[#003b69] text-white">
-                  {creator.fullName?.substring(0, 2).toUpperCase()}
+                  {creator?.fullName?.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <span className="text-sm text-gray-300">
-                Created by <span className="font-medium text-white">{creator.fullName}</span>
+                Created by <span className="font-medium text-white">{creator?.fullName}</span>
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -109,6 +109,16 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
   )
 }
 
+async function getCreator(userId: string) {
+  try {
+    const creator = await (await clerkClient()).users.getUser(userId);
+    return creator;
+  } catch (err) {
+    return undefined
+    console.error(err)
+  }
+}
+
 
 {/* {ranking.collaborative && pendingRankItems.length > 0 && <div>
   <div>Pending Rank Items</div>
@@ -119,5 +129,3 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
     rankingUserId={ranking.userId}
   />)}
 </div>} */}
-
-
