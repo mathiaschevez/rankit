@@ -32,7 +32,7 @@ export default function RankItem({ rankItem, index }: { rankItem: RankItemWithSc
       if (type === currentVote.type) {
         socket.emit('unvote', { ...currentVote });
       }
-      else socket.emit('vote', { ...currentVote, type });
+      else socket.emit('vote', { ...currentVote, type }, true);
     }
     else {
       socket.emit('vote', {
@@ -42,7 +42,7 @@ export default function RankItem({ rankItem, index }: { rankItem: RankItemWithSc
         rankItemId: rankItem._id,
         rankingId: rankItem.rankingId,
         type,
-      });
+      }, false);
     }
   }
 
