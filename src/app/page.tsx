@@ -17,6 +17,7 @@ export default async function Home() {
     <main className="p-4">
       <div className="text-3xl font-semibold mb-4">Rankings</div>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <CreateRankingButton user={user} />
         {rankings.map((ranking) => (
           <Link
             href={`/ranking/${ranking._id}`}
@@ -36,13 +37,13 @@ export default async function Home() {
                 <h3 className="font-semibold text-gray-100">{ranking.title}</h3>
                 {ranking.collaborative && <Badge variant="blue">Collaborative</Badge>}
               </div>
-              <p className="text-sm text-gray-400">{timeSince(ranking._id)}</p>
+              <div className="flex items-start justify-between">
+                <p className="text-sm text-gray-400">{timeSince(ranking._id)}</p>
+                <p className="text-sm text-gray-400">{ranking.voteCount} votes</p>
+              </div>
             </div>
           </Link>
         ))}
-      </div>
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-      <CreateRankingButton user={user} />
       </div>
     </main>
   );
@@ -51,19 +52,19 @@ export default async function Home() {
 function CreateRankingButton({ user }: { user: User | null }) {
   return <>
     {user ? (
-      <Link href={'/create'} className="flex h-[220px] flex-col items-center justify-center rounded-lg border border-dashed border-gray-700 bg-gray-900/50 p-6 text-gray-400 transition-colors hover:border-[#005CA3] hover:text-[#4a9ede]">
+      <Link href={'/create'} className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-700 bg-gray-900/50 p-6 text-gray-400 transition-colors hover:border-[#005CA3] hover:text-[#4a9ede]">
         <div className="mb-3 rounded-full bg-[#005CA3]/10 p-3">
           <Plus className="h-6 w-6 text-[#4a9ede]" />
         </div>
-        <p className="font-medium">Create New Ranking</p>
+        <p className="font-bold">Create New Ranking</p>
       </Link>
     ) : (
       <SignInButton>
-        <div className="flex h-[220px] flex-col items-center justify-center rounded-lg border border-dashed border-gray-700 bg-gray-900/50 p-6 text-gray-400 transition-colors hover:border-[#005CA3] hover:text-[#4a9ede]">
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-700 bg-gray-900/50 p-6 text-gray-400 transition-colors hover:border-[#005CA3] hover:text-[#4a9ede]">
           <div className="mb-3 rounded-full bg-[#005CA3]/10 p-3">
             <Plus className="h-6 w-6 text-[#4a9ede]" />
           </div>
-          <p className="font-medium">Create New Ranking</p>
+          <p className="font-bold">Create New Ranking</p>
         </div>
       </SignInButton>
     )}

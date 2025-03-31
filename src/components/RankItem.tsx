@@ -79,38 +79,3 @@ export default function RankItem({ rankItem, index }: { rankItem: RankItemWithSc
     </div>
   )
 }
-
-{/* <div className="space-y-4">
-        {rankItems.map((item) => (
-
-
-            <div className="flex flex-col items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "h-8 w-8 rounded-full text-gray-400 hover:bg-[#005CA3]/10 hover:text-[#4a9ede]",
-                  item.userVote === "up" && "bg-[#005CA3]/20 text-[#4a9ede]",
-                )}
-                onClick={() => handleVote(item.id, "up")}
-              >
-                <ChevronUp className="h-5 w-5" />
-                <span className="sr-only">Upvote</span>
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "h-8 w-8 rounded-full text-gray-400 hover:bg-[#005CA3]/10 hover:text-[#4a9ede]",
-                  item.userVote === "down" && "bg-[#005CA3]/20 text-[#4a9ede]",
-                )}
-                onClick={() => handleVote(item.id, "down")}
-              >
-                <ChevronDown className="h-5 w-5" />
-                <span className="sr-only">Downvote</span>
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div> */}

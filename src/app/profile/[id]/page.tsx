@@ -3,13 +3,13 @@ import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { fetchUserRankings } from "../../api/rankings";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { ArrowLeft, Calendar, Edit, ImagePlus } from "lucide-react";
+import { Calendar, Edit, ImagePlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { timeSince } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fetchUser } from "@/app/api/users";
 import Link from "next/link";
-import { SignOutButton } from "@clerk/nextjs";
+import BackButton from "@/components/BackButton";
 
 export default async function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const userId = (await params).id;
@@ -24,15 +24,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="dark min-h-screen bg-gray-950 text-gray-100">
-      {/* Back button */}
-      <SignOutButton />
       <div className="mx-auto max-w-7xl px-4 py-4">
-        <Button variant="ghost" className="flex items-center text-gray-400 hover:text-white">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
+        <BackButton text="Back" />
       </div>
-
       {/* Banner */}
       <div className="relative">
         <div className="h-48 w-full overflow-hidden bg-gray-800 sm:h-64 md:h-80">
@@ -49,8 +43,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
           <div className="absolute inset-0 bg-gradient-to-t from-gray-950 to-transparent opacity-60"></div>
         </div>
       </div>
-
-      {/* Profile Info Section */}
       <div className="mx-auto max-w-7xl px-4">
         <div className="relative -mt-20 mb-6">
           {/* Profile Image */}
@@ -86,7 +78,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
             </div>
           </div>
         </div>
-        {/* Stats - Compact Version */}
         <div className="mb-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
           <div className="flex items-center">
             <span className="mr-1 font-semibold text-white">{userRankings.length}</span>
@@ -105,7 +96,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
             <span className="text-gray-400">Following</span>
           </div>
         </div>
-        {/* Rankings Tabs */}
         <Tabs defaultValue="created" className="mb-12">
           <TabsList className="mb-6 grid w-full grid-cols-2 bg-gray-900">
             <TabsTrigger value="created" className="data-[state=active]:bg-[#005CA3] data-[state=active]:text-white">
@@ -151,8 +141,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
               </div>
             )}
           </TabsContent>
-
-          {/* Contributed Rankings Tab */}
           <TabsContent value="contributed">
             {/* <h2 className="mb-4 text-xl font-semibold">
               Rankings {isOwnProfile ? "You've" : `${user.name} Has`} Contributed To

@@ -4,7 +4,7 @@
 import type React from "react"
 
 import { useState, useRef } from "react"
-import { ArrowLeft, ImagePlus, X, Loader2 } from "lucide-react"
+import { ImagePlus, X, Loader2 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 import { SignOutButton } from "@clerk/nextjs"
 import { MongoUser } from "@/redux/user"
+import BackButton from "./BackButton"
 
 export default function EditProfileForm({ userDetails }: { userDetails: MongoUser }) {
   const { toast } = useToast()
@@ -117,10 +118,7 @@ export default function EditProfileForm({ userDetails }: { userDetails: MongoUse
     <div className="dark min-h-screen bg-gray-950 text-gray-100">
       {/* Back button */}
       <div className="mx-auto max-w-3xl px-4 py-4">
-        <Button variant="ghost" className="flex items-center text-gray-400 hover:text-white">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Profile
-        </Button>
+        <BackButton text="Back to profile" />
       </div>
 
       <div className="mx-auto max-w-3xl px-4 pb-16">

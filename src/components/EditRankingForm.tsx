@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useRef, useEffect, useMemo } from "react"
-import { ArrowLeft, ImagePlus, Plus, Trash2, X, AlertTriangle } from "lucide-react"
+import { ImagePlus, Plus, Trash2, X, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -25,8 +25,8 @@ import { useUser } from "@clerk/nextjs"
 import Image from "next/image"
 import { deleteRanking, Ranking, updateRanking } from "@/app/api/rankings"
 import { insertRankItems, updateRankItem } from "@/app/api/rankItems"
+import BackButton from "./BackButton"
 
-// Updated RankItem type to match MongoDB structure
 export type RankItemType = {
   _id: string
   userId: string
@@ -314,14 +314,7 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
     <div className="dark min-h-screen bg-gray-950 text-gray-100">
       {/* Back button */}
       <div className="mx-auto max-w-3xl px-4 py-4">
-        <Button
-          variant="ghost"
-          className="flex items-center text-gray-400 hover:text-white"
-          onClick={() => router.back()}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Ranking
-        </Button>
+        <BackButton text='Back to Ranking' />
       </div>
 
       <div className="mx-auto max-w-3xl px-4 pb-16">

@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
-import { ArrowLeft, ImagePlus, Plus, Trash2, X } from "lucide-react"
+import { ImagePlus, Plus, Trash2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -15,6 +15,7 @@ import { useUser } from "@clerk/nextjs"
 import Image from "next/image"
 import { createRanking } from "../api/rankings"
 import { insertRankItems } from "../api/rankItems"
+import BackButton from "@/components/BackButton"
 
 type RankItem = {
   name: string
@@ -165,10 +166,7 @@ export default function CreateRanking() {
   return (
     <div className="dark min-h-screen bg-gray-950 text-gray-100">
       <div className="mx-auto max-w-3xl px-4 py-4">
-        <Button variant="ghost" className="flex items-center text-gray-400 hover:text-white">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Rankings
-        </Button>
+        <BackButton text="Back to Rankings" />
       </div>
       <div className="mx-auto max-w-3xl px-4 pb-16">
         <h1 className="mb-6 text-2xl font-bold">Create New Ranking</h1>
