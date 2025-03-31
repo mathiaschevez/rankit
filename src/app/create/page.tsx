@@ -112,6 +112,7 @@ export default function CreateRanking() {
           imageKey,
           userEmail,
           userId,
+          voteCount: 0,
         });
       })
       .then((rankingResult) => {

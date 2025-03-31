@@ -11,12 +11,13 @@ export type Ranking = {
   userId: string,
   userEmail: string,
   title: string,
+  voteCount: number,
   description?: string,
   coverImageUrl: string,
   imageKey: string,
   collaborative: boolean,
   privateMode: boolean,
-  updatedAt?: string | null,
+  lastModified?: string | null,
 }
 
 export async function fetchRankings(): Promise<Ranking[]> {
