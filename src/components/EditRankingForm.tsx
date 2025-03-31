@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import { ArrowLeft, ImagePlus, Plus, Trash2, X, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -36,9 +36,10 @@ export type RankItemType = {
   imageUrl: string
   name: string
   imageKey: string
-  position?: number
   votes?: number
   image?: File | null // For new uploads
+  upvotes: number,
+  downvotes: number,
 }
 
 // Type for new items being added
@@ -124,6 +125,8 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
         name: newItemName,
         imageKey: "",
         image: newItemImage,
+        upvotes: 0,
+        downvotes: 0,
       }
 
       setRankItems([...rankItems, tempItem])
@@ -284,7 +287,8 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
             userEmail,
             imageUrl: uploadedFile?.url || "",
             imageKey: uploadedFile?.key || "",
-            position: item.position,
+            upvotes: 0,
+            downvotes: 0,
           };
         });
 
@@ -299,6 +303,12 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
       console.error("Error updating ranking:", error);
     }
   }
+
+    const rankItemsSortedByScore = useMemo(() => {
+      return rankItems
+        .map(ri => ({ ...ri, score: ri.upvotes - ri.downvotes }))
+        .sort((a, b) => b.score - a.score)
+    }, [rankItems]);
 
   return (
     <div className="dark min-h-screen bg-gray-950 text-gray-100">
@@ -457,9 +467,9 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
           <div className="space-y-4 rounded-lg border border-gray-800 bg-gray-900 p-4">
             <h2 className="text-lg font-medium">Current Rank Items</h2>
 
-            {rankItems.length > 0 ? (
+            {rankItemsSortedByScore.length > 0 ? (
               <div className="space-y-3">
-                {rankItems.map((item) => (
+                {rankItemsSortedByScore.map((item, index) => (
                   <div
                     key={item._id}
                     className={cn(
@@ -472,7 +482,7 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">
                           <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#005CA3]/10 text-lg font-bold text-[#4a9ede]">
-                            {item.position}
+                            {index + 1}
                           </div>
                           <div className="flex-1">
                             <Input
@@ -568,7 +578,7 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
                       // View mode
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#005CA3]/10 text-lg font-bold text-[#4a9ede]">
-                          {item.position}
+                          {index + 1}
                         </div>
 
                         {item.imageUrl && (

@@ -143,6 +143,8 @@ export default function CreateRanking() {
             userEmail,
             imageUrl: uploadedFile?.url || "",
             imageKey: uploadedFile?.key || "",
+            upvotes: 0,
+            downvotes: 0,
           };
         });
   

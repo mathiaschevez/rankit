@@ -14,6 +14,8 @@ export type RankItemType = {
   imageUrl: string,
   name: string,
   imageKey: string,
+  upvotes: number,
+  downvotes: number,
 }
 
 export async function fetchRankItems(rankingId: string): Promise<RankItemType[]> {

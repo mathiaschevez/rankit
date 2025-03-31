@@ -29,17 +29,19 @@ export default function RankItems({ initialVotes, rankItems, rankingId }: { init
   }, [socket, dispatch, initialVotes, rankingId]);
 
   const rankItemsSortedByScore = useMemo(() => {
-    const filteredVotes = votes.filter(v => v.rankingId.toString() === rankingId);
+    return rankItems
+      .map(ri => ({
+        ...ri,
+        score: ri.upvotes - ri.downvotes,
+        rankItemVotes: votes.filter(v => v.rankItemId === ri._id)
+      }))
+      .sort((a, b) => {
+        if (b.score === a.score) return b.rankItemVotes.length - a.rankItemVotes.length;
+        return b.score - a.score;
+      })
+  }, [rankItems, votes]);
 
-    return rankItems.map(ri => {
-      const rankItemVotes = filteredVotes.filter(v => v.rankItemId === ri._id);
-      const score = rankItemVotes.filter(v => v.type === 'upvote').length ?? 1 / rankItemVotes.filter(v => v.type === 'downvote').length ?? 1
-      return { ...ri, rankItemVotes, score }
-    }).sort((a, b) => {
-      if (b.score === a.score) return b.rankItemVotes.length - a.rankItemVotes.length;
-      return b.score - a.score;
-    })
-  }, [rankItems, votes, rankingId]);
+  console.log(rankItemsSortedByScore)
 
   return (
     <div className='space-y-4'>
