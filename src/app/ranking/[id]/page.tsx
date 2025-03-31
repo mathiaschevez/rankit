@@ -3,9 +3,11 @@ import { fetchRankItems } from '@/app/api/rankItems';
 import { fetchVotes } from '@/app/api/votes';
 // import PendingRankItem from '@/components/PendingRankItem';
 import RankItems from '@/components/RankItems';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { timeSince } from '@/lib/utils';
+import { clerkClient, currentUser } from '@clerk/nextjs/server';
 import { ArrowLeft, Share, Shield, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -16,6 +18,10 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
   const ranking = await fetchRankingById(rankingId);
   const rankItems = await fetchRankItems(rankingId);
   const initialVotes = await fetchVotes(rankingId);
+
+  const creator = await (await clerkClient()).users.getUser(ranking.userId);
+  const user = await currentUser();
+  const isCreator = user?.id === ranking.userId;
 
   return (
     <div className="dark min-h-screen bg-gray-950 text-gray-100">
@@ -42,15 +48,14 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
           <p className="mt-2 text-gray-400">{ranking.description ?? ''}</p>
           <div className="mt-4 flex items-center gap-4">
             <div className="flex items-center gap-2">
-              {/* <Avatar className="h-8 w-8 border border-gray-700">
-                <AvatarImage src={ranking.creator.avatar} alt={ranking.creator.name} />
+              <Avatar className="h-8 w-8 border border-gray-700">
+                <AvatarImage src={creator.imageUrl} alt={creator.fullName ?? ''} />
                 <AvatarFallback className="bg-[#003b69] text-white">
-                  {ranking.creator.name.substring(0, 2).toUpperCase()}
+                  {creator.fullName?.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
-              </Avatar> */}
+              </Avatar>
               <span className="text-sm text-gray-300">
-                {/* Created by <span className="font-medium text-white">{ranking.creator.name}</span> */}
-                Created by <span className="font-medium text-white">User</span>
+                Created by <span className="font-medium text-white">{creator.fullName}</span>
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -74,7 +79,7 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
             <Share className="mr-2 h-4 w-4" />
             Share
           </Button>
-          {/* <Link href={`/ranking/${rankingId}/edit`}>
+          {isCreator && <Link href={`/ranking/${rankingId}/edit`}>
             <Button className="bg-[#005CA3] hover:bg-[#004a82]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -92,7 +97,7 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
               </svg>
               Edit
             </Button>
-          </Link> */}
+          </Link>}
         </div>
       </div>
     </div>
