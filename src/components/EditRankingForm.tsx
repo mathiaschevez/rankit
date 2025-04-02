@@ -26,6 +26,7 @@ import Image from "next/image"
 import { deleteRanking, Ranking, updateRanking } from "@/app/api/rankings"
 import { insertRankItems, updateRankItem } from "@/app/api/rankItems"
 import BackButton from "./BackButton"
+import { insertPendingRankItems } from "@/app/api/pendingRankItems"
 
 export type RankItemType = {
   _id: string
@@ -53,6 +54,8 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
   const { user } = useUser()
   const router = useRouter()
   const { startUpload } = useUploader()
+
+  const isCreator = ranking.userId === user?.id;
 
   const [title, setTitle] = useState(ranking.title)
   const [description, setDescription] = useState(ranking.description ?? '')
@@ -304,6 +307,57 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
     }
   }
 
+  async function handleCollaboratorSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!user?.id || !user?.emailAddresses?.[0]?.emailAddress || !ranking) {
+      console.error("Missing required data (user or ranking).");
+      return;
+    }
+
+    const userId = user.id;
+    const userEmail = user.emailAddresses[0].emailAddress;
+
+    try {
+      const newItems = rankItems.filter((item) => item._id.startsWith("temp_"));
+
+      if (newItems.length > 0) {
+        const newItemsWithImages = newItems.filter((item) => item.image);
+        const imagesToUpload = newItemsWithImages
+          .map((item) => item.image)
+          .filter((img): img is File => img !== null);
+  
+        let uploadResults: { name: string, url: string, key: string }[] = [];
+        if (imagesToUpload.length > 0) {
+          uploadResults = (await startUpload(imagesToUpload)) || [];
+        }
+  
+        const itemsToInsert = newItems.map((item) => {
+          const uploadedFile = item.image
+            ? uploadResults.find((file) => file.name === item.fileName)
+            : null;
+  
+          return {
+            name: item.name,
+            fileName: item.fileName,
+            rankingId: ranking._id,
+            userId,
+            userEmail,
+            imageUrl: uploadedFile?.url || "",
+            imageKey: uploadedFile?.key || "",
+            upvotes: 0,
+            downvotes: 0,
+          };
+        });
+
+        await insertPendingRankItems(itemsToInsert);
+      }
+
+      router.replace(`/ranking/${ranking._id}`);
+    } catch (error) {
+      console.error("Error updating ranking:", error);
+    }
+  }
+
     const rankItemsSortedByScore = useMemo(() => {
       return rankItems
         .map(ri => ({ ...ri, score: ri.upvotes - ri.downvotes }))
@@ -320,7 +374,7 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
       <div className="mx-auto max-w-3xl px-4 pb-16">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Edit Ranking</h1>
-          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          {isCreator && <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="destructive">Delete Ranking</Button>
             </DialogTrigger>
@@ -348,10 +402,10 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
                 </Button>
               </DialogFooter>
             </DialogContent>
-          </Dialog>
+          </Dialog>}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={isCreator ? handleSubmit : handleCollaboratorSubmit} className="space-y-8">
           {/* Ranking Image */}
           <div className="space-y-2">
             <Label htmlFor="ranking-image">Ranking Cover Image</Label>
@@ -375,7 +429,7 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
                       />
                     )}
                   </div>
-                  <Button
+                  {isCreator && <Button
                     type="button"
                     variant="outline"
                     size="icon"
@@ -383,7 +437,7 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <ImagePlus className="h-4 w-4" />
-                  </Button>
+                  </Button>}
                 </div>
               ) : (
                 <div
@@ -412,50 +466,46 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
           {/* Ranking Title */}
           <div className="space-y-2">
             <Label htmlFor="title">Ranking Title</Label>
-            <Input
+            {isCreator ? <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter a title for your ranking"
               className="border-gray-700 bg-gray-800 text-white placeholder:text-gray-500"
               required
-            />
+            /> : <div className="text-white text-lg">{title}</div>}
           </div>
-
           {/* Ranking Description */}
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea
+            {isCreator ? <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe what this ranking is about"
               className="min-h-[100px] border-gray-700 bg-gray-800 text-white placeholder:text-gray-500"
-            />
+            /> : <div className="text-white">{description || 'No Description'}</div>}
           </div>
-
-          {/* Collaborative Switch */}
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="collaborative"
-              checked={isCollaborative}
-              onCheckedChange={setIsCollaborative}
-              className="data-[state=checked]:bg-[#005CA3]"
-            />
-            <Label htmlFor="collaborative">Allow collaboration</Label>
-          </div>
-
-          {/* Private Switch */}
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="private"
-              checked={isPrivate}
-              onCheckedChange={setIsPrivate}
-              className="data-[state=checked]:bg-[#005CA3]"
-            />
-            <Label htmlFor="private">Set this ranking to private</Label>
-          </div>
-
+          {isCreator && <>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="collaborative"
+                checked={isCollaborative}
+                onCheckedChange={setIsCollaborative}
+                className="data-[state=checked]:bg-[#005CA3]"
+              />
+              <Label htmlFor="collaborative">Allow collaboration</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="private"
+                checked={isPrivate}
+                onCheckedChange={setIsPrivate}
+                className="data-[state=checked]:bg-[#005CA3]"
+              />
+              <Label htmlFor="private">Set this ranking to private</Label>
+            </div>
+          </>}
           {/* Current Rank Items */}
           <div className="space-y-4 rounded-lg border border-gray-800 bg-gray-900 p-4">
             <h2 className="text-lg font-medium">Current Rank Items</h2>
@@ -589,8 +639,7 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
                           <p className="truncate font-medium">{item.name}</p>
                           <p className="text-xs text-gray-400">{item.votes || 0} votes</p>
                         </div>
-
-                        <div className="flex items-center gap-1">
+                        {isCreator && <div className="flex items-center gap-1">
                           <Button
                             type="button"
                             variant="ghost"
@@ -624,7 +673,7 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                        </div>
+                        </div>}
                       </div>
                     )}
                   </div>
@@ -720,9 +769,9 @@ export default function EditRankingForm({ currentRankItems, ranking }: { current
             <Button
               type="submit"
               className="bg-[#005CA3] hover:bg-[#004a82]"
-              disabled={!title.trim() || rankItems.length === 0}
+              disabled={!title.trim() || rankItems.length === 0 || rankItems.length === currentRankItems.length}
             >
-              Save Changes
+              {isCreator ? 'Save Changes' : 'Request Updates'}
             </Button>
           </div>
         </form>

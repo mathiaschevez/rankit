@@ -14,11 +14,14 @@ import { ArrowLeft, Shield, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react'
+import { fetchPendingRankItems } from '@/app/api/pendingRankItems';
+import PendingRankItem from '@/components/PendingRankItem';
 
 export default async function RankingDetail({ params }: { params: Promise<{ id: string }> }) {
   const rankingId = (await params).id;
   const ranking = await fetchRankingById(rankingId);
   const rankItems = await fetchRankItems(rankingId);
+  const pendingRankItems = await fetchPendingRankItems(rankingId);
   const initialVotes = await fetchVotes(rankingId);
 
   const user = await currentUser();
@@ -84,7 +87,7 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
             <Share className="mr-2 h-4 w-4" />
             Share
           </Button> */}
-          {isCreator && <Link href={`/ranking/${rankingId}/edit`}>
+          {isCreator || (userDetails && ranking.collaborative === true) && <Link href={`/ranking/${rankingId}/edit`}>
             <Button className="bg-[#005CA3] hover:bg-[#004a82]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -107,8 +110,12 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
       </div>
     </div>
     <div className="mx-auto max-w-7xl px-4 pb-16">
-      <h2 className="mb-6 text-xl font-semibold">Rankings</h2>
+      <h2 className="mb-6 text-xl font-semibold">Ranking Items</h2>
       <RankItems initialVotes={initialVotes} rankingId={rankingId} rankItems={rankItems} />
+    </div>
+    <div className="mx-auto max-w-7xl px-4 pb-16">
+      <h2 className="mb-6 text-xl font-semibold">Pending Ranking Items</h2>
+      {pendingRankItems.map(item => <PendingRankItem key={item._id} rankItem={item} isCreator={isCreator} />)}
     </div>
     </div>
   )
@@ -123,14 +130,3 @@ async function getCreator(userId: string) {
     console.error(err)
   }
 }
-
-
-{/* {ranking.collaborative && pendingRankItems.length > 0 && <div>
-  <div>Pending Rank Items</div>
-  {pendingRankItems.map((rankItem, i) => <PendingRankItem
-    key={rankItem.id}
-    index={i + 1}
-    pendingRankItem={rankItem}
-    rankingUserId={ranking.userId}
-  />)}
-</div>} */}

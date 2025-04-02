@@ -1,44 +1,46 @@
 'use client';
 
-// import { SelectPendingRankItem } from "@/server/db/schema";
-// import Image from "next/image";
-// import { Button } from "./ui/button";
-// import { deletePendingRankItem, insertRankItems } from "@/server/queries";
-// import { useRouter } from "next/navigation";
-// import { useSelector } from "@/redux/store";
+import Image from "next/image";
+import { RankItemType } from "./EditRankingForm";
+import { Check, X } from "lucide-react";
 
-// { pendingRankItem, index, rankingUserId }: { pendingRankItem: SelectPendingRankItem, index: number, rankingUserId: string }
+export default function PendingRankItem({ rankItem, isCreator }: { rankItem: RankItemType, isCreator: boolean }) {
+  function handleAcceptRankItem() {
+    console.log('accept');
+  }
 
-export default function PendingRankItem() {
-  // const router = useRouter();
-  // const user = useSelector(state => state.user)
-
-  // function handleAcceptRankItem(pendingRankItem: SelectPendingRankItem) {
-  //   insertRankItems([{
-  //     name: pendingRankItem.name,
-  //     fileName: pendingRankItem.fileName,
-  //     imageKey: pendingRankItem.imageKey,
-  //     imageUrl: pendingRankItem.imageUrl,
-  //     rankingId: pendingRankItem.rankingId,
-  //   }]).then(() => {
-  //     deletePendingRankItem(pendingRankItem.id).then(() => router.refresh());
-  //   })
-  // }
-
-  // function handleDeclineRankitem(id: number) {
-  //   deletePendingRankItem(id).then(() => router.refresh());
-  // }
+  function handleDeclineRankitem() {
+    console.log('decline');
+  }
 
   return (
-    <div className='flex w-full h-20 items-center gap-4'>
-      Pending rank item
-      {/* <div>{index}</div>
-      <Image alt="rankItemImage" src={pendingRankItem.imageUrl} width={50} height={50} />
-      <div className='text-xl flex-1'>{pendingRankItem.name}</div>
-      {user.user?.userId === rankingUserId ? <div className="flex gap-4">
-        <Button onClick={() => handleDeclineRankitem(pendingRankItem.id)}>Decline</Button>
-        <Button onClick={() => handleAcceptRankItem(pendingRankItem)}>Accept</Button>
-      </div> : <i className="text-slate-500">Pending</i>} */}
+    <div
+      key={rankItem._id}
+      className="flex items-center gap-4 rounded-lg border border-gray-800 bg-gray-900 p-4 transition-all hover:border-[#005CA3]/30"
+    >
+      {/* <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#005CA3]/10 text-lg font-bold text-[#4a9ede]">
+        {index}
+      </div> */}
+      <div className="hidden h-16 w-24 flex-shrink-0 overflow-hidden rounded-md bg-gray-800 sm:block">
+        <Image src={rankItem.imageUrl} alt={rankItem.name} className="h-full w-full object-cover" height={100} width={100} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="truncate font-medium">{rankItem.name}</h3>
+      </div>
+      {isCreator && <div className={`flex ml-auto items-center rounded-full py-1 px-1 gap-3`}>
+        <button
+          className={`p-2 rounded-full font-bold text-xl items-center gap-2 flex`}
+          onClick={handleAcceptRankItem}
+        >
+          <Check className={`size-4`} strokeWidth={6} />
+        </button>
+        <button
+          className={`p-2 rounded-full font-bold flex items-center gap-2`}
+          onClick={handleDeclineRankitem}
+        >
+          <X className={`size-4`}  strokeWidth={6} />
+        </button>
+      </div>}
     </div>
   )
 }
