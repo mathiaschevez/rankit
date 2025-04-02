@@ -113,10 +113,10 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
       <h2 className="mb-6 text-xl font-semibold">Ranking Items</h2>
       <RankItems initialVotes={initialVotes} rankingId={rankingId} rankItems={rankItems} />
     </div>
-    <div className="mx-auto max-w-7xl px-4 pb-16">
+    {pendingRankItems.length > 0 && <div className="mx-auto max-w-7xl px-4 pb-16">
       <h2 className="mb-6 text-xl font-semibold">Pending Ranking Items</h2>
       {pendingRankItems.map(item => <PendingRankItem key={item._id} rankItem={item} isCreator={isCreator} />)}
-    </div>
+    </div>}
     </div>
   )
 }

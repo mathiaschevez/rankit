@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import useSocket from '@/hooks/useSocket';
 import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import { RankItemType } from '@/app/api/rankItems';
-import { useUser } from '@clerk/nextjs';
+import { SignedIn, SignedOut, SignInButton, useUser } from '@clerk/nextjs';
 
 interface RankItemWithScore extends RankItemType {
   score: number,
@@ -62,19 +62,34 @@ export default function RankItem({ rankItem, index }: { rankItem: RankItemWithSc
         <p className="text-sm text-gray-400">{rankItem.rankItemVotes.length} votes</p>
       </div>
       <div className={`${voteColor?.background} flex ml-auto items-center rounded-full py-1 px-1 gap-3`}>
-        <button
-          className={`${voteColor.upvote} p-2 rounded-full font-bold text-xl items-center gap-2 flex`}
-          onClick={() => handleVote('upvote')}
-        >
-          <ArrowUpIcon className={`size-4`} strokeWidth={6} />
-        </button>
-        <span className='text-lg font-bold'>{rankItem.rankItemVotes.filter(v => v.type === 'upvote').length}</span>
-        <button
-          className={`${voteColor.downvote} p-2 rounded-full font-bold flex items-center gap-2`}
-          onClick={() => handleVote('downvote')}
-        >
-          <ArrowDownIcon className={`size-4`}  strokeWidth={6} />
-        </button>
+        <SignedIn>
+          <button
+            className={`${voteColor.upvote} p-2 rounded-full font-bold text-xl items-center gap-2 flex`}
+            onClick={() => handleVote('upvote')}
+          >
+            <ArrowUpIcon className={`size-4`} strokeWidth={6} />
+          </button>
+          <span className='text-lg font-bold'>{rankItem.rankItemVotes.filter(v => v.type === 'upvote').length}</span>
+          <button
+            className={`${voteColor.downvote} p-2 rounded-full font-bold flex items-center gap-2`}
+            onClick={() => handleVote('downvote')}
+          >
+            <ArrowDownIcon className={`size-4`}  strokeWidth={6} />
+          </button>
+        </SignedIn>
+        <SignedOut>
+          <SignInButton>
+            <button className={`${voteColor.upvote} p-2 rounded-full font-bold text-xl items-center gap-2 flex`}>
+              <ArrowUpIcon className={`size-4`} strokeWidth={6} />
+            </button>
+          </SignInButton>
+          <span className='text-lg font-bold'>{rankItem.rankItemVotes.filter(v => v.type === 'upvote').length}</span>
+          <SignInButton>
+            <button className={`${voteColor.downvote} p-2 rounded-full font-bold flex items-center gap-2`}>
+              <ArrowDownIcon className={`size-4`}  strokeWidth={6} />
+            </button>
+          </SignInButton>
+        </SignedOut>
       </div>
     </div>
   )
