@@ -1,6 +1,8 @@
 import { fetchRankingById } from '@/app/api/rankings';
 import { fetchRankItems } from '@/app/api/rankItems';
+import { fetchUser } from '@/app/api/users';
 import { fetchVotes } from '@/app/api/votes';
+import SaveRankingButton from '@/components/SaveRankingButton';
 // import PendingRankItem from '@/components/PendingRankItem';
 import RankItems from '@/components/RankItems';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -8,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { timeSince } from '@/lib/utils';
 import { clerkClient, currentUser } from '@clerk/nextjs/server';
-import { ArrowLeft, Share, Shield, Users } from 'lucide-react';
+import { ArrowLeft, Shield, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react'
@@ -22,6 +24,8 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
   const user = await currentUser();
   const creator = (await getCreator(ranking.userId)) ?? user;
   const isCreator = user?.id === ranking.userId;
+
+  const userDetails = await fetchUser(user?.id ?? '');
 
   return (
     <div className="dark min-h-screen bg-gray-950 text-gray-100">
@@ -75,10 +79,11 @@ export default async function RankingDetail({ params }: { params: Promise<{ id: 
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button className="bg-[#005CA3] hover:bg-[#004a82]">
+          {userDetails && !isCreator && <SaveRankingButton userDetails={userDetails} rankingId={rankingId} />}
+          {/* <Button className="bg-[#005CA3] hover:bg-[#004a82]">
             <Share className="mr-2 h-4 w-4" />
             Share
-          </Button>
+          </Button> */}
           {isCreator && <Link href={`/ranking/${rankingId}/edit`}>
             <Button className="bg-[#005CA3] hover:bg-[#004a82]">
               <svg

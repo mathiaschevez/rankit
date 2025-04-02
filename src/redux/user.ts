@@ -10,6 +10,8 @@ export type MongoUser = {
   following?: number,
   location?: string,
   userName?: string,
+  collaborations?: string[],
+  savedRankings?: string[]
 }
 
 export interface UserState {
